@@ -1,0 +1,1 @@
+﻿src/modules/inventory/inventory.service.ts(706,26): error TS2345: Argument of type '{ variantId: any; branchId: any; branchName: string; sku: string; productName: string; size: string; color: string; totalQuantity: number; threshold: number; }' is not assignable to parameter of type 'never'.

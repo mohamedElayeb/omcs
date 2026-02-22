@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  omcs-db:
+    image: postgres:16
+    container_name: omcs-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: omcs
+      POSTGRES_USER: omcs_user
+      POSTGRES_PASSWORD: strongpassword
+    ports:
+      - "5433:5432"
+    volumes:
+      - omcs_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U omcs_user -d omcs" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: omcs-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@outletmaster.ly
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5051:80"
+    volumes:
+      - omcs_pgadmin:/var/lib/pgadmin
+    depends_on:
+      omcs-db:
+        condition: service_healthy
+
+volumes:
+  omcs_pgdata:
+    driver: local
+  omcs_pgadmin:
+    driver: local
