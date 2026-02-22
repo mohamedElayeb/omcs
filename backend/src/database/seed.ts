@@ -1,84 +1,48 @@
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { config } from 'dotenv';
+import * as path from 'path';
 
 config();
 
-import { Branch } from '../entities/branch.entity';
-import { User } from '../entities/user.entity';
-import { Category } from '../entities/category.entity';
-import { Product } from '../entities/product.entity';
-import { ProductVariant } from '../entities/product-variant.entity';
-import { ProductImage } from '../entities/product-image.entity'; // ✅ IMPORTANT
-import { Inventory } from '../entities/inventory.entity';
-import { StockMovement } from '../entities/stock-movement.entity';
-import { StockTransfer } from '../entities/stock-transfer.entity';
-import { Sale } from '../entities/sale.entity';
-import { SaleItem } from '../entities/sale-item.entity';
-import { Return } from '../entities/return.entity';
-import { ReturnItem } from '../entities/return-item.entity';
-import { DailyClosing } from '../entities/daily-closing.entity';
-import { PriceHistory } from '../entities/price-history.entity';
 import { UserRole, StockMovementAction } from '../common/enums';
 
 function buildDataSource() {
-  // ✅ Prefer Railway DATABASE_URL
-  const databaseUrl = process.env.DATABASE_URL || process.env.DATABASE_URL?.trim();
+  // ✅ Railway غالباً يعطي DATABASE_URL (أفضل خيار)
+  const databaseUrl =
+    process.env.DATABASE_URL ||
+    process.env.DATABASE_URL_PUBLIC ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_URL_NON_POOLING;
+
+  // ✅ اجمع كل الـ entities تلقائياً (حل نهائي لمشاكل metadata)
+  // يلقط: src/entities/*.entity.ts + أي entity داخل modules أيضاً
+  const entitiesGlob = path.join(__dirname, '..', '**', '*.entity.{ts,js}');
+
+  const base: any = {
+    type: 'postgres' as const,
+    entities: [entitiesGlob],
+    synchronize: true,
+    logging: false,
+  };
 
   if (databaseUrl) {
     return new DataSource({
-      type: 'postgres',
+      ...base,
       url: databaseUrl,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
-      entities: [
-        Branch,
-        User,
-        Category,
-        Product,
-        ProductVariant,
-        ProductImage, // ✅ FIX for Product#images metadata
-        Inventory,
-        StockMovement,
-        StockTransfer,
-        Sale,
-        SaleItem,
-        Return,
-        ReturnItem,
-        DailyClosing,
-        PriceHistory,
-      ],
-      synchronize: true,
-      logging: false,
+      // ملاحظة: Railway internal DB غالباً ما يحتاج SSL، لكن لو واجهت SSL error فعّل هذا:
+      // ssl: { rejectUnauthorized: false },
     });
   }
 
-  // ✅ Local fallback
+  // ✅ fallback لو شغال محلياً
   return new DataSource({
-    type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_NAME || 'omcs',
-    entities: [
-      Branch,
-      User,
-      Category,
-      Product,
-      ProductVariant,
-      ProductImage, // ✅ FIX
-      Inventory,
-      StockMovement,
-      StockTransfer,
-      Sale,
-      SaleItem,
-      Return,
-      ReturnItem,
-      DailyClosing,
-      PriceHistory,
-    ],
-    synchronize: true,
-    logging: false,
+    ...base,
+    host: process.env.DB_HOST || process.env.PGHOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || process.env.PGPORT || '5432', 10),
+    username: process.env.DB_USERNAME || process.env.PGUSER || 'postgres',
+    password: process.env.DB_PASSWORD || process.env.PGPASSWORD || 'postgres',
+    database: process.env.DB_NAME || process.env.PGDATABASE || 'omcs',
   });
 }
 
@@ -87,13 +51,20 @@ async function seed() {
 
   try {
     await ds.initialize();
+    console.log('✅ DataSource initialized');
     console.log('🌱 Seeding database...');
 
-    // --------------------
-    // Branches
-    // --------------------
-    const branchRepo = ds.getRepository(Branch);
-    const b1 = await branchRepo.save(
+    // repositories (نجيبهم بالاسم لأننا لم نعد نستورد Entities يدوياً)
+    const branchRepo = ds.getRepository('Branch');
+    const userRepo = ds.getRepository('User');
+    const catRepo = ds.getRepository('Category');
+    const prodRepo = ds.getRepository('Product');
+    const varRepo = ds.getRepository('ProductVariant');
+    const invRepo = ds.getRepository('Inventory');
+    const movRepo = ds.getRepository('StockMovement');
+
+    // ----- Branches -----
+    const b1: any = await branchRepo.save(
       branchRepo.create({
         name: 'السياحية',
         nameEn: 'Al-Siyahiya',
@@ -101,7 +72,7 @@ async function seed() {
         phone: '+218-91-0000001',
       }),
     );
-    const b2 = await branchRepo.save(
+    const b2: any = await branchRepo.save(
       branchRepo.create({
         name: 'النوفليين',
         nameEn: 'Al-Nawfaliyeen',
@@ -111,17 +82,22 @@ async function seed() {
     );
     console.log('✅ Branches created');
 
-    // --------------------
-    // Users
-    // --------------------
-    const userRepo = ds.getRepository(User);
-    const hash = await bcrypt.hash('Admin123!', 10);
+    // ----- Users -----
+    const adminHash = await bcrypt.hash('Admin123!', 10);
     const cashierHash = await bcrypt.hash('Cashier123!', 10);
 
     await userRepo.save([
       userRepo.create({
+        email: 'admin@outletmaster.ly',
+        passwordHash: adminHash,
+        fullName: 'Admin',
+        role: UserRole.OWNER,
+        maxDiscountPercent: 100,
+        maxDiscountValue: 999999,
+      }),
+      userRepo.create({
         email: 'mohamed@outletmaster.ly',
-        passwordHash: hash,
+        passwordHash: adminHash,
         fullName: 'Mohamed Elayeb',
         role: UserRole.OWNER,
         maxDiscountPercent: 100,
@@ -129,7 +105,7 @@ async function seed() {
       }),
       userRepo.create({
         email: 'manager1@outletmaster.ly',
-        passwordHash: hash,
+        passwordHash: adminHash,
         fullName: 'محمد الكيلاني',
         role: UserRole.MANAGER,
         branchId: b1.id,
@@ -139,7 +115,7 @@ async function seed() {
       }),
       userRepo.create({
         email: 'manager2@outletmaster.ly',
-        passwordHash: hash,
+        passwordHash: adminHash,
         fullName: 'سالم العريبي',
         role: UserRole.MANAGER,
         branchId: b2.id,
@@ -168,11 +144,8 @@ async function seed() {
     ]);
     console.log('✅ Users created');
 
-    // --------------------
-    // Categories
-    // --------------------
-    const catRepo = ds.getRepository(Category);
-    const cats = await catRepo.save([
+    // ----- Categories -----
+    const cats: any[] = await catRepo.save([
       catRepo.create({ name: 'Shoes', nameAr: 'أحذية' }),
       catRepo.create({ name: 'Jeans', nameAr: 'جينز' }),
       catRepo.create({ name: 'T-Shirts', nameAr: 'تيشيرتات' }),
@@ -181,14 +154,7 @@ async function seed() {
     ]);
     console.log('✅ Categories created');
 
-    // --------------------
-    // Products + Variants + Inventory + Movements
-    // --------------------
-    const prodRepo = ds.getRepository(Product);
-    const varRepo = ds.getRepository(ProductVariant);
-    const invRepo = ds.getRepository(Inventory);
-    const movRepo = ds.getRepository(StockMovement);
-
+    // ----- Products + Variants + Inventory -----
     const products = [
       {
         name: 'Nike Air Max 90',
@@ -249,7 +215,7 @@ async function seed() {
     ];
 
     for (const p of products) {
-      const product = await prodRepo.save(
+      const product: any = await prodRepo.save(
         prodRepo.create({
           name: p.name,
           brand: p.brand,
@@ -260,7 +226,7 @@ async function seed() {
       for (const v of p.variants) {
         const margin = ((v.sale - v.cost) / v.sale) * 100;
 
-        const variant = await varRepo.save(
+        const variant: any = await varRepo.save(
           varRepo.create({
             sku: v.sku,
             productId: product.id,
@@ -272,7 +238,6 @@ async function seed() {
           }),
         );
 
-        // Add stock to both branches
         for (const branch of [b1, b2]) {
           const qty = Math.floor(Math.random() * 30) + 5;
 
@@ -300,11 +265,13 @@ async function seed() {
 
     console.log('✅ Products, variants, inventory seeded');
     console.log('🎉 Seed complete!');
-  } catch (err) {
-    console.error('❌ Seed failed:', err);
+  } catch (e) {
+    console.error('❌ Seed failed:', e);
     process.exitCode = 1;
   } finally {
-    await ds.destroy().catch(() => null);
+    try {
+      await ds.destroy();
+    } catch {}
   }
 }
 
