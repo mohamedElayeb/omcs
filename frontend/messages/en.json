@@ -60,7 +60,8 @@
         "selectBranch": "Select Branch",
         "logout": "Sign Out",
         "loadingApp": "Loading OMCS...",
-        "noPermission": "Access Denied"
+        "noPermission": "Access Denied",
+        "more": "More"
     },
     "nav": {
         "dashboard": "Dashboard",

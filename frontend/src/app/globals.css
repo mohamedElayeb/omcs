@@ -1286,8 +1286,8 @@ tbody tr:last-child td {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-sm);
   background: var(--bg-tertiary);
   border: 1px solid var(--border);
@@ -1297,7 +1297,7 @@ tbody tr:last-child td {
   transition: background 0.2s, border-color 0.2s;
 }
 
-.hamburger-btn:hover {
+.hamburger-btn:active {
   background: var(--bg-hover);
   border-color: var(--gold);
 }
@@ -1305,13 +1305,13 @@ tbody tr:last-child td {
 .hamburger-icon {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  width: 18px;
+  gap: 5px;
+  width: 20px;
 }
 
 .hamburger-icon span {
   display: block;
-  height: 2px;
+  height: 2.5px;
   width: 100%;
   background: var(--text-primary);
   border-radius: 2px;
@@ -1319,7 +1319,7 @@ tbody tr:last-child td {
 }
 
 .hamburger-icon.open span:nth-child(1) {
-  transform: translateY(6px) rotate(45deg);
+  transform: translateY(7.5px) rotate(45deg);
 }
 
 .hamburger-icon.open span:nth-child(2) {
@@ -1327,17 +1327,23 @@ tbody tr:last-child td {
 }
 
 .hamburger-icon.open span:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
+  transform: translateY(-7.5px) rotate(-45deg);
 }
 
 .topbar-left {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 /* ─── Sidebar overlay for mobile ─── */
 .sidebar-overlay {
+  display: none;
+}
+
+/* ─── Bottom mobile nav (hidden on desktop) ─── */
+.mobile-bottom-nav {
   display: none;
 }
 
@@ -1380,7 +1386,9 @@ tbody tr:last-child td {
     display: flex;
   }
 
-  /* Sidebar: hidden by default, slides in on toggle */
+  /* Sidebar: off-screen by default.
+     RTL: sidebar is on the right, so push it further right (positive X).
+     LTR: sidebar is on the left, so push it further left (negative X). */
   .sidebar {
     transform: translateX(100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1388,12 +1396,12 @@ tbody tr:last-child td {
     box-shadow: -4px 0 30px rgba(0, 0, 0, 0.5);
   }
 
-  /* For LTR layouts */
   html[dir="ltr"] .sidebar {
     transform: translateX(-100%);
+    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
   }
 
-  /* When sidebar is open */
+  /* When sidebar is open — slide in */
   .sidebar-open .sidebar {
     transform: translateX(0) !important;
   }
@@ -1403,9 +1411,10 @@ tbody tr:last-child td {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.55);
     z-index: 55;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     animation: fadeIn 0.2s ease;
   }
 
@@ -1422,37 +1431,51 @@ tbody tr:last-child td {
   /* Main content: full width on mobile */
   .main-content {
     margin-inline-start: 0 !important;
+    padding-bottom: 72px;
+    /* space for bottom nav */
   }
 
   /* Topbar adjustments */
   .topbar {
-    padding: 0 16px;
-    height: 56px;
-    min-height: 56px;
+    padding: 0 12px;
+    height: 52px;
+    min-height: 52px;
+    gap: 8px;
   }
 
   .topbar .page-title {
-    font-size: 16px;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .right-section {
+    gap: 6px !important;
+    flex-shrink: 0;
   }
 
   /* Page content: less padding */
   .page-content {
-    padding: 16px;
+    padding: 14px;
   }
 
   /* Branch selector: smaller on mobile */
   .branch-selector {
-    min-width: 120px;
+    min-width: 100px;
+    max-width: 140px;
     font-size: 12px;
-    padding: 6px 10px;
+    padding: 6px 8px;
   }
 
-  /* ─── Tables: card-style on mobile ─── */
+  /* ─── Tables: horizontal scroll ─── */
   .table-container {
     border: none;
     border-radius: 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin-inline: -14px;
+    padding-inline: 0;
   }
 
   table {
@@ -1460,157 +1483,231 @@ tbody tr:last-child td {
   }
 
   thead th {
-    padding: 10px 12px;
+    padding: 8px 10px;
     font-size: 11px;
+    white-space: nowrap;
   }
 
   tbody td {
-    padding: 10px 12px;
+    padding: 10px;
     font-size: 13px;
   }
 
-  /* KPI cards */
+  /* ─── KPI cards ─── */
   .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
   }
 
   .kpi-card {
-    padding: 16px;
+    padding: 14px 12px;
+    overflow: visible;
+    /* allow text to show fully */
+  }
+
+  .kpi-card .card-title {
+    font-size: 11px;
+    letter-spacing: 0.3px;
   }
 
   .kpi-card .kpi-value {
-    font-size: 22px;
-    margin-top: 6px;
+    font-size: 18px;
+    margin-top: 4px;
+    word-break: break-all;
   }
 
   .kpi-card .kpi-label {
-    font-size: 12px;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .kpi-card .kpi-sub {
+    font-size: 10px;
+    margin-top: 2px;
   }
 
   .kpi-card .kpi-icon {
-    font-size: 22px;
-    top: 14px;
-    inset-inline-end: 14px;
+    font-size: 18px;
+    top: 10px;
+    inset-inline-end: 10px;
+    opacity: 0.3;
   }
 
-  /* Grids */
+  /* ─── Grids ─── */
   .grid-2,
   .grid-3 {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 12px;
   }
 
-  /* Cards */
+  /* ─── Cards ─── */
   .card {
-    padding: 16px;
+    padding: 14px;
     border-radius: var(--radius-sm);
   }
 
   .card-header {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
   }
 
-  /* Buttons */
+  .card-title {
+    font-size: 13px;
+  }
+
+  /* ─── Buttons ─── */
   .btn {
-    padding: 8px 16px;
+    padding: 10px 16px;
     font-size: 14px;
+    min-height: 42px;
   }
 
   .btn-sm {
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    min-height: 36px;
   }
 
-  /* POS Layout */
+  /* ─── POS Layout ─── */
   .pos-layout {
     grid-template-columns: 1fr;
     height: auto;
-    min-height: calc(100vh - 56px - 40px);
+    min-height: calc(100vh - 52px - 72px);
   }
 
   .pos-cart {
-    max-height: 400px;
+    max-height: 350px;
   }
 
   .pos-product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 8px;
   }
 
   .pos-product-card {
-    padding: 12px 10px;
+    padding: 10px 8px;
   }
 
   .pos-product-card .name {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .pos-product-card .price {
-    font-size: 16px;
+    font-size: 15px;
   }
 
-  /* Modals */
+  /* ─── Modals: nearly fullscreen ─── */
+  .modal-overlay {
+    padding: 8px;
+  }
+
   .modal {
-    margin: 16px;
-    padding: 20px;
-    max-width: calc(100vw - 32px);
-    max-height: calc(100vh - 32px);
+    margin: 0;
+    padding: 18px;
+    max-width: 100%;
+    width: 100%;
+    max-height: calc(100vh - 16px);
     overflow-y: auto;
+    border-radius: var(--radius-md);
   }
 
   .modal h2 {
-    font-size: 18px;
-    margin-bottom: 16px;
-  }
-
-  /* Search bar */
-  .search-bar {
-    padding: 8px 12px;
+    font-size: 17px;
     margin-bottom: 14px;
   }
 
-  .search-bar input {
-    font-size: 14px;
+  /* ─── Search ─── */
+  .simple-search {
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: 1 1 100% !important;
   }
 
-  /* Simple search */
   .simple-search__wrap {
-    padding: 10px 14px;
+    padding: 10px 12px;
   }
 
   .simple-search__input {
-    font-size: 14px;
+    font-size: 15px;
   }
 
-  /* View switcher */
+  /* ─── View switcher ─── */
   .view-switcher__btn {
-    padding: 6px 10px;
-    font-size: 11px;
+    padding: 8px 12px;
+    font-size: 12px;
   }
 
-  /* Badges */
+  /* ─── Badges ─── */
   .badge {
     font-size: 11px;
-    padding: 2px 8px;
+    padding: 3px 8px;
   }
 
-  /* Form inputs */
+  /* ─── Form inputs ─── */
   .form-input {
-    font-size: 14px;
-    padding: 9px 12px;
+    font-size: 16px;
+    /* prevents iOS zoom on focus */
+    padding: 10px 12px;
   }
 
   .form-label {
     font-size: 13px;
   }
 
-  /* Barcode preview */
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  /* ─── Bottom Navigation Bar ─── */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    z-index: 50;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 4px;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .mobile-bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 4px;
+    border-radius: 8px;
+    font-size: 10px;
+    color: var(--text-muted);
+    text-decoration: none;
+    min-width: 56px;
+    transition: color 0.2s;
+  }
+
+  .mobile-bottom-nav a .nav-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .mobile-bottom-nav a.active {
+    color: var(--gold);
+  }
+
+  .mobile-bottom-nav a:active {
+    background: var(--bg-hover);
+  }
+
+  /* ─── Barcode preview ─── */
   .barcode-preview {
-    padding: 12px;
+    padding: 10px;
   }
 }
 
@@ -1622,29 +1719,38 @@ tbody tr:last-child td {
     font-size: 13px;
   }
 
+  .topbar {
+    padding: 0 10px;
+  }
+
   .topbar .page-title {
     font-size: 14px;
   }
 
   .page-content {
-    padding: 12px;
+    padding: 10px;
   }
 
+  /* Single column KPIs for very small phones */
   .kpi-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 6px;
   }
 
   .kpi-card {
-    padding: 12px;
+    padding: 10px;
+  }
+
+  .kpi-card .card-title {
+    font-size: 10px;
   }
 
   .kpi-card .kpi-value {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .kpi-card .kpi-label {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .kpi-card .kpi-icon {
@@ -1657,34 +1763,48 @@ tbody tr:last-child td {
   }
 
   .pos-product-card .name {
-    font-size: 12px;
-  }
-
-  .pos-product-card .price {
-    font-size: 14px;
-  }
-
-  .branch-selector {
-    min-width: 100px;
     font-size: 11px;
   }
 
-  .right-section {
-    gap: 8px !important;
+  .pos-product-card .price {
+    font-size: 13px;
+  }
+
+  .branch-selector {
+    max-width: 110px;
+    font-size: 11px;
   }
 
   .modal {
-    margin: 8px;
-    padding: 16px;
+    padding: 14px;
   }
 
   .card {
-    padding: 12px;
+    padding: 10px;
   }
 
   .btn {
-    padding: 7px 12px;
+    padding: 8px 10px;
     font-size: 13px;
+  }
+
+  .btn-sm {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  /* Bottom nav smaller */
+  .mobile-bottom-nav {
+    height: 56px;
+  }
+
+  .mobile-bottom-nav a {
+    font-size: 9px;
+    min-width: 48px;
+  }
+
+  .mobile-bottom-nav a .nav-icon {
+    font-size: 18px;
   }
 }
 
@@ -1704,7 +1824,8 @@ tbody tr:last-child td {
   }
 
   .btn-sm {
-    min-height: 36px;
+    min-height: 38px;
+    padding: 8px 12px;
   }
 
   /* Show action buttons always on touch (no hover) */
@@ -1712,16 +1833,25 @@ tbody tr:last-child td {
     opacity: 1;
   }
 
-  /* Remove hover effects that don't work on touch */
-  .product-card:hover {
-    transform: none;
-  }
-
-  .pos-product-card:hover {
-    transform: none;
-  }
-
+  /* Remove hover transform effects on touch */
+  .product-card:hover,
+  .pos-product-card:hover,
   .btn-primary:hover {
     transform: none;
+  }
+
+  /* Make table rows easier to tap */
+  tbody td {
+    padding: 12px 10px;
+  }
+
+  /* Easier to use date inputs */
+  input[type="date"] {
+    min-height: 40px;
+  }
+
+  /* Toggle elements easier */
+  select {
+    min-height: 40px;
   }
 }

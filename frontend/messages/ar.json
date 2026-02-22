@@ -60,7 +60,8 @@
         "selectBranch": "اختر الفرع",
         "logout": "تسجيل الخروج",
         "loadingApp": "جاري تحميل OMCS...",
-        "noPermission": "غير مسموح بالوصول"
+        "noPermission": "غير مسموح بالوصول",
+        "more": "المزيد"
     },
     "nav": {
         "dashboard": "لوحة التحكم",
