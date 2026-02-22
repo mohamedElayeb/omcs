@@ -16,6 +16,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     const [showOnlineBanner, setShowOnlineBanner] = useState(false);
     const [pendingCount, setPendingCount] = useState(0);
     const [pageTitle, setPageTitle] = useState('');
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Hydrate auth from localStorage on mount
     useEffect(() => { hydrate(); }, []);
@@ -28,6 +29,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 .catch(console.error);
         }
     }, [token]);
+
+    // Close sidebar on route change (mobile)
+    useEffect(() => {
+        setSidebarOpen(false);
+    }, [pathname]);
 
     // Monitor network status
     useEffect(() => {
@@ -123,11 +129,29 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 </div>
             )}
 
-            <div className="app-layout" style={{ paddingTop: !isOnline || showOnlineBanner ? '36px' : 0 }}>
+            {/* Mobile sidebar overlay */}
+            {sidebarOpen && (
+                <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+            )}
+
+            <div className={`app-layout ${sidebarOpen ? 'sidebar-open' : ''}`} style={{ paddingTop: !isOnline || showOnlineBanner ? '36px' : 0 }}>
                 <Sidebar />
                 <main className="main-content">
                     <div className="topbar">
-                        <h2 className="page-title">{pageTitle}</h2>
+                        <div className="topbar-left">
+                            <button
+                                className="hamburger-btn"
+                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                                aria-label="Toggle menu"
+                            >
+                                <span className={`hamburger-icon ${sidebarOpen ? 'open' : ''}`}>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </span>
+                            </button>
+                            <h2 className="page-title">{pageTitle}</h2>
+                        </div>
                         <div className="right-section">
                             {pendingCount > 0 && (
                                 <span className="badge badge-gold">
