@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "description": "",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
+"scripts": {
+  "build": "nest build",
+  "start:prod": "node dist/main.js",
+  "seed": "node dist/database/seed.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
