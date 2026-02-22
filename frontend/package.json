@@ -4,10 +4,10 @@
   "private": true,
   "description": "",
 "scripts": {
-  "build": "nest build",
-  "start:prod": "node dist/main.js",
-  "seed": "node dist/database/seed.js"
-},
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
