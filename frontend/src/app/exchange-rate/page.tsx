@@ -149,7 +149,7 @@ export default function ExchangeRatePage() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div className="grid-2" style={{ gap: 20 }}>
                 {/* Update Selling Rate */}
                 <div className="card">
                     <div className="card-header">

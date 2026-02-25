@@ -183,33 +183,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 </main>
             </div>
 
-            {/* Mobile Bottom Navigation */}
-            <nav className="mobile-bottom-nav">
-                <Link href="/dashboard" className={pathname === '/dashboard' ? 'active' : ''}>
-                    <span className="nav-icon">📊</span>
-                    <span>{t('nav.dashboard')}</span>
-                </Link>
-                <Link href="/pos" className={pathname === '/pos' ? 'active' : ''}>
-                    <span className="nav-icon">🛒</span>
-                    <span>{t('nav.pos')}</span>
-                </Link>
-                <Link href="/products" className={pathname === '/products' ? 'active' : ''}>
-                    <span className="nav-icon">📦</span>
-                    <span>{t('nav.products')}</span>
-                </Link>
-                <Link href="/sales" className={pathname === '/sales' ? 'active' : ''}>
-                    <span className="nav-icon">🧾</span>
-                    <span>{t('nav.sales')}</span>
-                </Link>
-                <button
-                    className={sidebarOpen ? 'active' : ''}
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                    <span className="nav-icon">☰</span>
-                    <span>{t('common.more') || 'المزيد'}</span>
-                </button>
-            </nav>
         </>
     );
 }

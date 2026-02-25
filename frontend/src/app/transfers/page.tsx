@@ -311,21 +311,96 @@ export default function TransfersPage() {
 
                         <div className="form-group">
                             <label className="form-label">{t('transfers.productVariant')}</label>
-                            {form.fromBranchId && (
-                                <input className="form-input" placeholder="Search by SKU, name, size..."
-                                    value={searchInv} onChange={e => setSearchInv(e.target.value)}
-                                    style={{ marginBottom: 6, fontSize: 12 }} />
+                            {form.fromBranchId ? (
+                                <>
+                                    <div className="simple-search" style={{ marginBottom: 8 }}>
+                                        <div className="simple-search__wrap">
+                                            <span className="simple-search__icon">🔍</span>
+                                            <input
+                                                className="simple-search__input"
+                                                placeholder="Search by SKU, name, size..."
+                                                value={searchInv}
+                                                onChange={e => setSearchInv(e.target.value)}
+                                                autoComplete="off"
+                                                spellCheck={false}
+                                            />
+                                            {searchInv && (
+                                                <button className="simple-search__clear" onClick={() => setSearchInv('')} type="button">✕</button>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div style={{
+                                        maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4,
+                                        border: '1px solid var(--border)', borderRadius: 8, padding: 6, background: 'var(--bg-primary)'
+                                    }}>
+                                        {filteredInventory.length === 0 && (
+                                            <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)', fontSize: 13 }}>
+                                                {searchInv ? 'No products match your search' : 'No inventory in this branch'}
+                                            </div>
+                                        )}
+                                        {filteredInventory.map(inv => {
+                                            const isSelected = form.variantId === inv.variantId;
+                                            const isOutOfStock = inv.quantity <= 0;
+                                            return (
+                                                <button
+                                                    key={inv.id}
+                                                    type="button"
+                                                    onClick={() => !isOutOfStock && setForm({ ...form, variantId: inv.variantId })}
+                                                    style={{
+                                                        display: 'flex', alignItems: 'center', gap: 10,
+                                                        padding: '10px 12px', borderRadius: 8, border: 'none',
+                                                        background: isSelected ? 'rgba(212,175,55,0.12)' : 'var(--bg-secondary)',
+                                                        outline: isSelected ? '2px solid var(--gold)' : '1px solid var(--border)',
+                                                        cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                                                        opacity: isOutOfStock ? 0.4 : 1,
+                                                        textAlign: 'start', width: '100%',
+                                                        transition: 'all 0.15s ease',
+                                                    }}
+                                                >
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {inv.variant?.product?.name || '—'}
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 3, flexWrap: 'wrap' }}>
+                                                            {inv.variant?.size && (
+                                                                <span className="badge" style={{ fontSize: 10, padding: '2px 6px' }}>
+                                                                    {inv.variant.size}
+                                                                </span>
+                                                            )}
+                                                            {inv.variant?.color && (
+                                                                <span className="badge" style={{ fontSize: 10, padding: '2px 6px', background: 'var(--purple-bg)', color: 'var(--purple)' }}>
+                                                                    {inv.variant.color}
+                                                                </span>
+                                                            )}
+                                                            <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                                                                {inv.variant?.sku}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{
+                                                        textAlign: 'center', minWidth: 44,
+                                                        padding: '4px 8px', borderRadius: 6,
+                                                        background: inv.quantity > 5 ? 'var(--green-bg)' : inv.quantity > 0 ? 'var(--red-bg)' : 'var(--bg-tertiary)',
+                                                        color: inv.quantity > 5 ? 'var(--green)' : inv.quantity > 0 ? 'var(--red)' : 'var(--text-muted)',
+                                                        fontWeight: 700, fontSize: 14,
+                                                    }}>
+                                                        {inv.quantity}
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    {form.variantId && (
+                                        <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 4 }}>
+                                            ✓ {inventory.find(i => i.variantId === form.variantId)?.variant?.product?.name} — {inventory.find(i => i.variantId === form.variantId)?.variant?.sku}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, border: '1px dashed var(--border)', borderRadius: 8 }}>
+                                    {t('transfers.selectSource') || 'Select source branch first'}
+                                </div>
                             )}
-                            <select className="form-input" value={form.variantId}
-                                onChange={e => setForm({ ...form, variantId: e.target.value })} size={form.fromBranchId ? 5 : 1}
-                                style={form.fromBranchId ? { height: 'auto' } : {}}>
-                                <option value="">{form.fromBranchId ? 'Select product' : 'Select source branch first'}</option>
-                                {filteredInventory.map(inv => (
-                                    <option key={inv.id} value={inv.variantId}>
-                                        {inv.variant?.sku} — {inv.variant?.product?.name} ({inv.variant?.size || ''}{inv.variant?.color ? ` / ${inv.variant.color}` : ''}) — Stock: {inv.quantity}
-                                    </option>
-                                ))}
-                            </select>
                         </div>
 
                         <div className="grid-2">

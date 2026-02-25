@@ -1,0 +1,3 @@
+BACKEND=https://legendary-congratulations-handling-nat.trycloudflare.com
+FRONTEND=https://powerpoint-defense-embassy-aud.trycloudflare.com
+STOREFRONT=https://chubby-artistic-platforms-targets.trycloudflare.com

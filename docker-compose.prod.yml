@@ -1,0 +1,117 @@
+version: '3.9'
+
+services:
+  # ──────────────────────────────────────────
+  # PostgreSQL Database
+  # ──────────────────────────────────────────
+  omcs-db:
+    image: postgres:16
+    container_name: omcs-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-omcs}
+      POSTGRES_USER: ${POSTGRES_USER:-omcs_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      - "5433:5432"
+    volumes:
+      - omcs_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-omcs_user} -d ${POSTGRES_DB:-omcs}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - omcs-net
+
+  # ──────────────────────────────────────────
+  # NestJS Backend API
+  # ──────────────────────────────────────────
+  omcs-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: omcs-backend
+    restart: unless-stopped
+    depends_on:
+      omcs-db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-omcs_user}:${POSTGRES_PASSWORD}@omcs-db:5432/${POSTGRES_DB:-omcs}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      DB_SYNC: ${DB_SYNC:-false}
+    ports:
+      - "4000:4000"
+    volumes:
+      - omcs_uploads:/app/uploads
+    networks:
+      - omcs-net
+
+  # ──────────────────────────────────────────
+  # Next.js Admin Frontend
+  # ──────────────────────────────────────────
+  omcs-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${BACKEND_PUBLIC_URL:-http://localhost:4000}
+    container_name: omcs-frontend
+    restart: unless-stopped
+    depends_on:
+      - omcs-backend
+    ports:
+      - "4001:3000"
+    networks:
+      - omcs-net
+
+  # ──────────────────────────────────────────
+  # Next.js Customer Storefront
+  # ──────────────────────────────────────────
+  omcs-storefront:
+    build:
+      context: ./storefront
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${BACKEND_PUBLIC_URL:-http://localhost:4000}
+    container_name: omcs-storefront
+    restart: unless-stopped
+    depends_on:
+      - omcs-backend
+    ports:
+      - "4002:3000"
+    networks:
+      - omcs-net
+
+  # ──────────────────────────────────────────
+  # Nginx Reverse Proxy (optional but recommended)
+  # ──────────────────────────────────────────
+  omcs-nginx:
+    image: nginx:alpine
+    container_name: omcs-nginx
+    restart: unless-stopped
+    depends_on:
+      - omcs-backend
+      - omcs-frontend
+      - omcs-storefront
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - omcs-net
+
+volumes:
+  omcs_pgdata:
+    driver: local
+  omcs_uploads:
+    driver: local
+
+networks:
+  omcs-net:
+    driver: bridge

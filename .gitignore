@@ -31,3 +31,9 @@ npm-debug.log*
 # Misc
 .turbo/
 coverage/
+uploads/
+backend_log.txt
+log.txt
+test-output.txt
+debug.log
+*.tsbuildinfo

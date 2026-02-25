@@ -423,9 +423,9 @@ export default function BarcodesPage() {
     if (loading) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>{t('common.loading')}</div>;
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, height: 'calc(100vh - 60px - 56px)' }}>
+        <div className="barcode-page-grid">
             {/* ═══ LEFT PANEL: Config + Products ═══ */}
-            <div style={{ overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="barcode-config-panel">
 
                 {/* ─── Template Presets ─── */}
                 <div className="card" style={{ padding: 14 }}>
@@ -698,14 +698,15 @@ export default function BarcodesPage() {
             </div>
 
             {/* ═══ RIGHT PANEL: Preview + Export ═══ */}
-            <div style={{ overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="barcode-preview-panel">
                 {/* Actions bar */}
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <div style={{ flex: 1, fontSize: 13, color: 'var(--text-secondary)' }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, fontSize: 13, color: 'var(--text-secondary)', minWidth: 0 }}>
                         {labels.length} label{labels.length !== 1 ? 's' : ''} • {config.width}×{config.height}mm • X-scale {config.barcodeXScale}
                     </div>
                     <button className="btn btn-primary" onClick={exportPDF}
-                        disabled={labels.length === 0 || exporting}>
+                        disabled={labels.length === 0 || exporting}
+                        style={{ whiteSpace: 'nowrap' }}>
                         {exporting ? '⏳ Exporting...' : '📄 Export PDF'}
                     </button>
                 </div>

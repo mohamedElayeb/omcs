@@ -52,6 +52,7 @@ interface VariantRow {
     costPrice: string;
     salePrice: string;
     marginOverride: string;
+    quantity: string;
 }
 
 // Round UP to nearest 5 LYD for sale price (Libya requirement)
@@ -290,6 +291,7 @@ export default function ProductsPage() {
             costPrice: calc.costPrice || bulkCost,
             salePrice: calc.salePrice || bulkSale,
             marginOverride: '',
+            quantity: '1',
         };
     };
 
@@ -498,7 +500,13 @@ export default function ProductsPage() {
                         purchaseDate: purchaseDate || undefined,
                     };
                 }),
-                initialStock: initialBranchId ? { branchId: initialBranchId } : undefined,
+                initialStock: initialBranchId ? {
+                    branchId: initialBranchId,
+                    quantities: Object.fromEntries(
+                        variants.filter(v => v.sku.trim() && Number(v.quantity) > 0)
+                            .map(v => [v.sku.trim(), Number(v.quantity)])
+                    ),
+                } : undefined,
             });
             // Step 3: Upload additional images to product_images table
             if (created?.id && imageFiles.length > 0) {
@@ -1239,7 +1247,7 @@ export default function ProductsPage() {
                                         <thead>
                                             <tr>
                                                 <th style={{ width: 30 }}>#</th><th>SKU</th><th>Size</th><th>Color</th>
-                                                <th>{t('products.costUsdTh')}</th><th>{t('products.sellUsdTh')}</th><th>{t('products.costLydTh')}</th><th>{t('products.saleLydTh')}</th><th style={{ width: 50 }}>{t('products.profitTh')}</th><th style={{ width: 40 }}></th>
+                                                <th>{t('products.costUsdTh')}</th><th>{t('products.sellUsdTh')}</th><th>{t('products.costLydTh')}</th><th>{t('products.saleLydTh')}</th><th style={{ width: 50 }}>{t('products.profitTh')}</th><th style={{ width: 55 }}>{t('common.quantity')}</th><th style={{ width: 40 }}></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1275,6 +1283,11 @@ export default function ProductsPage() {
                                                         <td style={{ fontSize: 12, textAlign: 'end', color: 'var(--gold)', fontWeight: 600, fontFamily: 'monospace' }}>{computedSaleLyd || '—'}</td>
                                                         <td style={{ fontSize: 12, fontWeight: 600, color: profit !== '—' && Number(profit) > 0 ? 'var(--green)' : 'var(--text-muted)' }}>
                                                             {profit !== '—' ? `+${profit}` : profit}
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" className="form-input" value={v.quantity}
+                                                                onChange={e => updateVariant(i, 'quantity', e.target.value)}
+                                                                min="0" step="1" style={{ padding: '4px 8px', fontSize: 12, width: 55, textAlign: 'center' }} />
                                                         </td>
                                                         <td><button className="btn btn-danger btn-sm" onClick={() => removeVariant(i)} style={{ padding: '2px 6px', fontSize: 11 }}>✕</button></td>
                                                     </tr>

@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:4000` : 'http://localhost:4000');
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 interface FetchOptions extends RequestInit {
     token?: string;
