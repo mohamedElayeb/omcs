@@ -2,76 +2,47 @@
 description: Deploy OMCS to Railway (backend + DB) and Vercel (frontend + storefront)
 ---
 
-# Deploy OMCS Online
+# Deploy OMCS
 
-## Part 1: Railway (Backend + Database)
+## URLs
+- **Backend API**: https://omcs-production.up.railway.app
+- **Frontend (Admin)**: https://omcs-three.vercel.app
+- **API Docs**: https://omcs-production.up.railway.app/api/docs
 
+## Railway (Backend + DB)
+- **Project**: poetic-illumination
+- **Services**: Postgres + omcs (backend)
+- **Backend Variables**: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGINS`
+- **Builder**: Dockerfile at `backend/Dockerfile`
+- **Start command**: `npm run start:prod`
+
+## Vercel (Frontend)
+- **Project**: omcs
+- **Root Directory**: `frontend`
+- **Env Variable**: `NEXT_PUBLIC_API_URL=https://omcs-production.up.railway.app`
+
+## Deploying Updates
 // turbo-all
 
-1. Go to https://railway.app and sign in with your GitHub account (mohamedElayeb)
+1. Make your code changes locally
+2. Push to GitHub:
+```bash
+git add -A
+git commit -m "your message"
+git push origin main
+```
+3. Railway auto-deploys the backend from the `main` branch
+4. Vercel auto-deploys the frontend from the `main` branch
+5. No manual steps needed — both services watch the GitHub repo
 
-2. Click **"New Project"** → **"Provision PostgreSQL"**
-   - This creates a free PostgreSQL database
-   - Go to the PostgreSQL service → **Variables** tab
-   - Copy the `DATABASE_URL` value (you'll need it next)
+## First-Time Setup Notes
+- The backend auto-seeds the database on startup if the `users` table is empty
+- JWT_SECRET must be set in Railway variables or login will fail with 500
+- The backend listens on Railway's PORT (8080), not the default 4000
+- Swagger docs are always enabled at `/api/docs`
 
-3. In the same project, click **"New"** → **"GitHub Repo"** → Select **omcs**
-   - Set **Root Directory** = `backend`
-   - Railway will auto-detect it as a Node.js app
-
-4. Go to the backend service → **Variables** tab → Add these:
-   ```
-   NODE_ENV=production
-   PORT=4000
-   DATABASE_URL=<paste the PostgreSQL DATABASE_URL>
-   JWT_SECRET=<generate a random string, e.g. run: openssl rand -hex 32>
-   CORS_ORIGINS=*
-   DB_SYNC=true
-   ```
-
-5. Go to **Settings** tab:
-   - **Build Command**: `npm ci && npm run build`
-   - **Start Command**: `node dist/main`
-   - In **Networking**, click **"Generate Domain"** to get a public URL
-   - Copy the generated URL (e.g. `https://omcs-production-xxxx.up.railway.app`)
-
-6. After the first successful deploy, change `DB_SYNC` to `false` in Variables
-
-## Part 2: Vercel (Frontend + Storefront)
-
-7. Go to https://vercel.com and sign in with your GitHub account
-
-8. Click **"Add New..."** → **"Project"** → Import **omcs** repo
-
-9. Configure the **Admin Frontend**:
-   - **Root Directory**: `frontend`
-   - **Framework Preset**: Next.js (auto-detected)
-   - **Environment Variables**: Add:
-     ```
-     NEXT_PUBLIC_API_URL=<your Railway backend URL from step 5>
-     ```
-   - Click **Deploy**
-
-10. Import the repo **again** for the **Storefront**:
-    - Click **"Add New..."** → **"Project"** → Import **omcs** again
-    - **Root Directory**: `storefront`
-    - **Framework Preset**: Next.js
-    - **Environment Variables**: Add:
-      ```
-      NEXT_PUBLIC_API_URL=<your Railway backend URL from step 5>
-      ```
-    - Click **Deploy**
-
-## Part 3: Update CORS
-
-11. Go back to Railway → Backend service → Variables
-    - Update `CORS_ORIGINS` to:
-      ```
-      https://your-frontend.vercel.app,https://your-storefront.vercel.app
-      ```
-    - Railway will auto-redeploy
-
-## Done! Your URLs:
-- **Backend API**: Railway URL + `/api/docs`
-- **Admin Dashboard**: Vercel frontend URL
-- **Customer Storefront**: Vercel storefront URL
+## Login Credentials
+- **Owner**: admin@outletmaster.ly / Admin123!
+- **Owner**: mohamed@outletmaster.ly / Admin123!
+- **Manager**: manager1@outletmaster.ly / Admin123!
+- **Cashier**: cashier1@outletmaster.ly / Cashier123!
