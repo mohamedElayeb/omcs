@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:4000` : 'http://localhost:4000');
+// API calls use relative URLs — Vercel rewrites proxy them to the backend
+const API_URL = '';
 
 async function fetchJson(url: string, options?: RequestInit) {
     const res = await fetch(`${API_URL}${url}`, {
@@ -50,7 +51,8 @@ export const ordersApi = {
 export function imgSrc(imageUrl?: string) {
     if (!imageUrl) return '';
     if (imageUrl.startsWith('http')) return imageUrl;
-    return `${API_URL}${imageUrl}`;
+    // Images served through same proxy (Vercel rewrites /uploads/* to backend)
+    return imageUrl;
 }
 
 export function formatPrice(n: number) {
