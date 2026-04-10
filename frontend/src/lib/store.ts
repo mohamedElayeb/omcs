@@ -54,6 +54,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (typeof window !== 'undefined') {
             localStorage.removeItem('omcs_token');
             localStorage.removeItem('omcs_user');
+            localStorage.removeItem('omcs_selected_branch');
         }
         set({ token: null, user: null, selectedBranchId: null });
     },
@@ -66,10 +67,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             try {
                 const user = JSON.parse(userStr);
                 set({ token, user, isHydrated: true });
-                // Non-owner users default to their branch
-                if (user.role !== 'OWNER' && user.branch) {
+
+                // Restore previously selected branch from localStorage
+                const savedBranch = localStorage.getItem('omcs_selected_branch');
+                if (savedBranch) {
+                    set({ selectedBranchId: savedBranch });
+                } else if (user.branch) {
+                    // User has a fixed branch in DB — use it
                     set({ selectedBranchId: user.branch.id });
                 }
+                // Otherwise: no branch selected — user picks from dropdown
             } catch {
                 set({ isHydrated: true });
             }
@@ -78,7 +85,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
-    setSelectedBranch: (branchId) => set({ selectedBranchId: branchId }),
+    setSelectedBranch: (branchId) => {
+        // Persist selection so it survives page reloads
+        if (typeof window !== 'undefined') {
+            if (branchId) {
+                localStorage.setItem('omcs_selected_branch', branchId);
+            } else {
+                localStorage.removeItem('omcs_selected_branch');
+            }
+        }
+        set({ selectedBranchId: branchId });
+    },
     setBranches: (branches) => set({ branches }),
 
     isAuthenticated: () => !!get().token,
@@ -88,3 +105,4 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     canViewProfit: () => ['OWNER', 'MANAGER'].includes(get().user?.role || ''),
     canChangePrice: () => ['OWNER', 'MANAGER'].includes(get().user?.role || ''),
 }));
+

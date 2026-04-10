@@ -40,7 +40,7 @@ export class AuthService {
 
     async verifyManagerPin(branchId: string, pin: string) {
         const manager = await this.userRepo.findOne({
-            where: { branchId, overridePin: pin, isActive: true },
+            where: { overridePin: pin, isActive: true, role: 'MANAGER' as any },
         });
         if (!manager) throw new UnauthorizedException('Invalid manager PIN');
         return { managerId: manager.id, managerName: manager.fullName };

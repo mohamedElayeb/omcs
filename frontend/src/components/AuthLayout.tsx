@@ -159,13 +159,25 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                                     📤 {pendingCount} {t('common.queued')}
                                 </span>
                             )}
-                            {user?.role === 'OWNER' ? (
+                            {(user?.role === 'OWNER' || user?.role === 'MANAGER') ? (
                                 <select
                                     className="branch-selector"
                                     value={selectedBranchId || ''}
                                     onChange={(e) => setSelectedBranch(e.target.value || null)}
                                 >
                                     <option value="">{t('common.allBranches')}</option>
+                                    {branches.map(b => (
+                                        <option key={b.id} value={b.id}>{b.name} ({b.nameEn})</option>
+                                    ))}
+                                </select>
+                            ) : user?.role === 'CASHIER' ? (
+                                <select
+                                    className="branch-selector"
+                                    value={selectedBranchId || ''}
+                                    onChange={(e) => setSelectedBranch(e.target.value || null)}
+                                    style={!selectedBranchId ? { borderColor: 'var(--gold)', animation: 'pulse 2s infinite' } : {}}
+                                >
+                                    <option value="" disabled>📍 {t('common.selectBranch') || 'اختر الفرع'}</option>
                                     {branches.map(b => (
                                         <option key={b.id} value={b.id}>{b.name} ({b.nameEn})</option>
                                     ))}

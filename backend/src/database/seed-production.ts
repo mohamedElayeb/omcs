@@ -83,9 +83,9 @@ async function seedProduction() {
     const cashierHash = await bcrypt.hash(cashierPassword, 10);
 
     // ═══════════════════════════════════════════
-    // ─── 1 Owner ───
+    // ─── 1 Owner (access all branches) ───
     // ═══════════════════════════════════════════
-    const owner = await userRepo.save(
+    await userRepo.save(
       userRepo.create({
         email: 'owner@omcs.com.ly',
         passwordHash: ownerHash,
@@ -101,39 +101,38 @@ async function seedProduction() {
     console.log(`   🔑 Password: ${ownerPassword}`);
 
     // ═══════════════════════════════════════════
-    // ─── 1 Manager (assigned to branch 1) ───
+    // ─── 1 Manager (access all branches, no fixed branch) ───
     // ═══════════════════════════════════════════
-    const manager = await userRepo.save(
+    await userRepo.save(
       userRepo.create({
         email: 'manager@omcs.com.ly',
         passwordHash: managerHash,
         fullName: 'Manager',
         role: UserRole.MANAGER,
-        branchId: b1.id,
+        // NO branchId — manager can access both branches
         overridePin: '1234',
         maxDiscountPercent: 50,
         maxDiscountValue: 500,
       }),
     );
     console.log('');
-    console.log('✅ Manager account created');
+    console.log('✅ Manager account created (access: ALL branches)');
     console.log(`   👤 Email: manager@omcs.com.ly`);
     console.log(`   🔑 Password: ${managerPassword}`);
-    console.log(`   📍 Branch: ${b1.name}`);
     console.log(`   🔐 Override PIN: 1234`);
 
     // ═══════════════════════════════════════════
-    // ─── 4 Cashiers ───
+    // ─── 4 Cashiers (no fixed branch — pick at login) ───
     // ═══════════════════════════════════════════
     const cashiers = [
-      { email: 'cashier1@omcs.com.ly', fullName: 'Cashier 1', branchId: b1.id, branchName: b1.name },
-      { email: 'cashier2@omcs.com.ly', fullName: 'Cashier 2', branchId: b1.id, branchName: b1.name },
-      { email: 'cashier3@omcs.com.ly', fullName: 'Cashier 3', branchId: b2.id, branchName: b2.name },
-      { email: 'cashier4@omcs.com.ly', fullName: 'Cashier 4', branchId: b2.id, branchName: b2.name },
+      { email: 'cashier1@omcs.com.ly', fullName: 'Cashier 1' },
+      { email: 'cashier2@omcs.com.ly', fullName: 'Cashier 2' },
+      { email: 'cashier3@omcs.com.ly', fullName: 'Cashier 3' },
+      { email: 'cashier4@omcs.com.ly', fullName: 'Cashier 4' },
     ];
 
     console.log('');
-    console.log('✅ Cashier accounts created');
+    console.log('✅ Cashier accounts created (branch: pick at login)');
 
     for (const c of cashiers) {
       await userRepo.save(
@@ -142,12 +141,12 @@ async function seedProduction() {
           passwordHash: cashierHash,
           fullName: c.fullName,
           role: UserRole.CASHIER,
-          branchId: c.branchId,
+          // NO branchId — cashier picks branch when starting shift
           maxDiscountPercent: 10,
           maxDiscountValue: 50,
         }),
       );
-      console.log(`   👤 ${c.email} → ${c.branchName}`);
+      console.log(`   👤 ${c.email}`);
     }
     console.log(`   🔑 Password (all cashiers): ${cashierPassword}`);
 
@@ -160,18 +159,20 @@ async function seedProduction() {
     console.log('═══════════════════════════════════════════');
     console.log('');
     console.log('📋 Account Summary:');
-    console.log('┌──────────┬─────────────────────────┬──────────────────┐');
-    console.log('│ Role     │ Email                   │ Password         │');
-    console.log('├──────────┼─────────────────────────┼──────────────────┤');
-    console.log(`│ Owner    │ owner@omcs.com.ly       │ ${ownerPassword.padEnd(16)} │`);
-    console.log(`│ Manager  │ manager@omcs.com.ly     │ ${managerPassword.padEnd(16)} │`);
-    console.log(`│ Cashier  │ cashier1@omcs.com.ly    │ ${cashierPassword.padEnd(16)} │`);
-    console.log(`│ Cashier  │ cashier2@omcs.com.ly    │ ${cashierPassword.padEnd(16)} │`);
-    console.log(`│ Cashier  │ cashier3@omcs.com.ly    │ ${cashierPassword.padEnd(16)} │`);
-    console.log(`│ Cashier  │ cashier4@omcs.com.ly    │ ${cashierPassword.padEnd(16)} │`);
-    console.log('└──────────┴─────────────────────────┴──────────────────┘');
+    console.log('┌──────────┬─────────────────────────┬──────────────────┬────────────────┐');
+    console.log('│ Role     │ Email                   │ Password         │ Branch         │');
+    console.log('├──────────┼─────────────────────────┼──────────────────┼────────────────┤');
+    console.log(`│ Owner    │ owner@omcs.com.ly       │ ${ownerPassword.padEnd(16)} │ All            │`);
+    console.log(`│ Manager  │ manager@omcs.com.ly     │ ${managerPassword.padEnd(16)} │ All            │`);
+    console.log(`│ Cashier  │ cashier1@omcs.com.ly    │ ${cashierPassword.padEnd(16)} │ Pick at login  │`);
+    console.log(`│ Cashier  │ cashier2@omcs.com.ly    │ ${cashierPassword.padEnd(16)} │ Pick at login  │`);
+    console.log(`│ Cashier  │ cashier3@omcs.com.ly    │ ${cashierPassword.padEnd(16)} │ Pick at login  │`);
+    console.log(`│ Cashier  │ cashier4@omcs.com.ly    │ ${cashierPassword.padEnd(16)} │ Pick at login  │`);
+    console.log('└──────────┴─────────────────────────┴──────────────────┴────────────────┘');
     console.log('');
     console.log('⚠️  IMPORTANT: Change these passwords after first login!');
+    console.log('📌 Manager can access both branches (like Owner)');
+    console.log('📌 Cashiers pick their working branch from the dropdown');
   } catch (e) {
     console.error('❌ Production seed failed:', e);
     process.exitCode = 1;

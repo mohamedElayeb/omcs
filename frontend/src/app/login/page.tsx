@@ -9,8 +9,8 @@ export default function LoginPage() {
     const router = useRouter();
     const { setAuth } = useAuthStore();
     const { t } = useTranslation();
-    const [email, setEmail] = useState('admin@outletmaster.ly');
-    const [password, setPassword] = useState('Admin123!');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -79,13 +79,9 @@ export default function LoginPage() {
                             {loading ? t('login.signingIn') : t('login.signIn')}
                         </button>
                     </form>
-
-                    <div style={{ marginTop: 24, fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
-                        <p>{t('login.demoAdmin')}</p>
-                        <p>{t('login.demoCashier')}</p>
-                    </div>
                 </div>
             </div>
         </div>
     );
 }
+
