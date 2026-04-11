@@ -401,9 +401,25 @@ export default function StorefrontPage() {
               ))}
             </div>
           </section>
-
-
-
+          {/* ─── SCROLLING MARQUEE ─── */}
+          <div className="marquee-strip">
+            <div className="marquee-track">
+              {[...Array(2)].map((_, idx) => (
+                <span key={idx} style={{ display: 'contents' }}>
+                  <span>🚚 التوصيل لكل أنحاء ليبيا</span><span className="dot" />
+                  <span>🔒 تسوق آمن وموثوق</span><span className="dot" />
+                  <span>✦ ماركات أصلية 100%</span><span className="dot" />
+                  <span>⚡ وصول جديد أسبوعياً</span><span className="dot" />
+                  <span>🏆 أفضل جودة</span><span className="dot" />
+                  <span>🚚 التوصيل لكل أنحاء ليبيا</span><span className="dot" />
+                  <span>🔒 تسوق آمن وموثوق</span><span className="dot" />
+                  <span>✦ ماركات أصلية 100%</span><span className="dot" />
+                  <span>⚡ وصول جديد أسبوعياً</span><span className="dot" />
+                  <span>🏆 أفضل جودة</span><span className="dot" />
+                </span>
+              ))}
+            </div>
+          </div>
           {/* ─── BEST SELLERS ─── */}
           {!loading && bestSellers.length > 0 && !search && !selectedCategory && !selectedBrand && (
             <section className="container" style={{ paddingTop: 48 }}>
