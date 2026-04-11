@@ -12,7 +12,7 @@ export const getDatabaseConfig = (
   // then switch to migrations.
   synchronize: config.get<string>('NODE_ENV') !== 'production' || config.get<string>('DB_SYNC') === 'true',
   ssl:
-    config.get<string>('NODE_ENV') === 'production'
+    config.get<string>('DB_SSL') === 'true'
       ? { rejectUnauthorized: false }
       : false,
 });
