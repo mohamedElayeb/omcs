@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Outlet Master — Premium Fashion & Lifestyle Store",
-  description: "Shop the latest in fashion, shoes, and lifestyle products. Fast delivery across Libya. Cash on delivery and bank transfer accepted.",
-  keywords: "outlet, fashion, shoes, clothing, Libya, online shopping, Tripoli, Benghazi",
+  title: "OMCS — متجر الأزياء والماركات العالمية",
+  description: "تسوق أحدث الأزياء والأحذية والماركات العالمية. توصيل سريع في جميع أنحاء ليبيا. الدفع نقداً عند الاستلام أو تحويل بنكي.",
+  keywords: "أوتلت, أزياء, أحذية, ملابس, ليبيا, تسوق أونلاين, طرابلس, بنغازي, ماركات",
   openGraph: {
-    title: "Outlet Master — Premium Fashion & Lifestyle Store",
-    description: "Shop the latest in fashion, shoes, and lifestyle products. Fast delivery across Libya.",
+    title: "OMCS — متجر الأزياء والماركات العالمية",
+    description: "تسوق أحدث الأزياء والأحذية والماركات العالمية. توصيل سريع في جميع أنحاء ليبيا.",
     type: "website",
   },
 };
@@ -18,7 +18,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="ar" dir="rtl">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      </head>
       <body>
         {children}
       </body>

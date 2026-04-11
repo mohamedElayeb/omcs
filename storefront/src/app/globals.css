@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
 
 /* ═══════════════════════════════════════════════════════════ */
 /*  DESIGN TOKENS                                             */
@@ -56,7 +56,7 @@ html {
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg);
     color: var(--text);
     line-height: 1.5;
@@ -183,7 +183,7 @@ textarea {
 
 .search-bar input {
     width: 100%;
-    padding: 11px 16px 11px 42px;
+    padding: 11px 42px 11px 16px;
     border: 1.5px solid var(--border);
     border-radius: 100px;
     background: rgba(245, 243, 240, .8);
@@ -200,7 +200,8 @@ textarea {
 
 .search-bar .search-icon {
     position: absolute;
-    left: 15px;
+    right: 15px;
+    left: auto;
     top: 50%;
     transform: translateY(-50%);
     font-size: .85rem;
@@ -398,7 +399,7 @@ textarea {
 }
 
 .hero h1 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Cairo', sans-serif;
     font-size: clamp(2.4rem, 6vw, 4.5rem);
     font-weight: 900;
     letter-spacing: -2px;
@@ -529,7 +530,7 @@ textarea {
 }
 
 .section-title {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Cairo', sans-serif;
     font-size: 1.8rem;
     font-weight: 800;
     letter-spacing: -.5px;
@@ -670,7 +671,8 @@ textarea {
 .card-badges {
     position: absolute;
     top: 12px;
-    left: 12px;
+    right: 12px;
+    left: auto;
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -715,7 +717,8 @@ textarea {
 .card-wishlist {
     position: absolute;
     top: 12px;
-    right: 12px;
+    left: 12px;
+    right: auto;
     z-index: 2;
     width: 36px;
     height: 36px;
@@ -787,7 +790,8 @@ textarea {
     font-size: .7rem;
     font-weight: 500;
     color: var(--text-muted);
-    margin-left: 2px;
+    margin-right: 2px;
+    margin-left: 0;
 }
 
 .stock-badge {

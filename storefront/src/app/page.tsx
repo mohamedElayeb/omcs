@@ -33,21 +33,21 @@ type Page = 'shop' | 'checkout' | 'success' | 'track';
 const HERO_SLIDES = [
   {
     bg: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)',
-    badge: '✦ New Season',
-    title: 'Premium Fashion Collection',
-    subtitle: 'Discover authentic brands at unbeatable outlet prices. Free delivery across Libya.',
+    badge: '✦ موسم جديد',
+    title: 'تشكيلة أزياء فاخرة',
+    subtitle: 'اكتشف ماركات أصلية بأسعار لا تُقاوم. توصيل مجاني في جميع أنحاء ليبيا.',
   },
   {
     bg: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #0a0a0a 100%)',
-    badge: '🔥 Limited Stock',
-    title: 'Exclusive Designer Drops',
-    subtitle: 'Shop Nike, Zara, H&M and more — all at outlet prices.',
+    badge: '🔥 كمية محدودة',
+    title: 'إصدارات حصرية',
+    subtitle: 'تسوق Nike, Zara, H&M والمزيد — بأسعار الأوتلت.',
   },
   {
     bg: 'linear-gradient(135deg, #16213e 0%, #0f3460 50%, #1a1a2e 100%)',
-    badge: '⚡ Flash Sale',
-    title: 'Up to 50% Off Everything',
-    subtitle: 'Don\'t miss our biggest sale of the season. Limited time only.',
+    badge: '⚡ عرض خاص',
+    title: 'خصومات تصل إلى 50%',
+    subtitle: 'لا تفوّت أكبر تخفيضاتنا لهذا الموسم. لفترة محدودة فقط.',
   },
 ];
 
@@ -178,7 +178,7 @@ export default function StorefrontPage() {
       size: v.size || '', color: v.color || '',
       sku: v.sku || '', salePrice: v.salePrice,
     }, 1);
-    setToast(`✓ ${product.name} added to cart`);
+    setToast(`✓ تمت إضافة ${product.name} إلى السلة`);
     setTimeout(() => setToast(''), 3000);
   };
 
@@ -192,7 +192,7 @@ export default function StorefrontPage() {
       size: variant.size || '', color: variant.color || '',
       sku: variant.sku || '', salePrice: variant.salePrice,
     }, addQty);
-    setToast(`✓ ${productDetail.name} added to cart`);
+    setToast(`✓ تمت إضافة ${productDetail.name} إلى السلة`);
     setTimeout(() => setToast(''), 3000);
     setProductDetail(null);
   };
@@ -201,11 +201,11 @@ export default function StorefrontPage() {
   const handleCheckout = async () => {
     setCheckoutError('');
     if (!form.customerName || !form.customerPhone || !form.shippingAddress || !form.shippingCity) {
-      setCheckoutError('Please fill in all required fields');
+      setCheckoutError('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
     if (cart.items.length === 0) {
-      setCheckoutError('Your cart is empty');
+      setCheckoutError('سلة التسوق فارغة');
       return;
     }
     setCheckoutLoading(true);
@@ -225,7 +225,7 @@ export default function StorefrontPage() {
       cart.clearCart();
       setPage('success');
     } catch (err: any) {
-      setCheckoutError(err.message || 'Failed to place order');
+      setCheckoutError(err.message || 'فشل في إرسال الطلب');
     } finally {
       setCheckoutLoading(false);
     }
@@ -264,8 +264,8 @@ export default function StorefrontPage() {
   // ─── WhatsApp URL ───
   const getWhatsAppUrl = () => {
     if (!orderResult) return '#';
-    const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '218910000000';
-    const msg = `Hello Outlet Master,\n\nI have completed a bank transfer.\n\nOrder Number: ${orderResult.orderNumber}\nAmount: ${formatPrice(orderResult.total)} LYD\nReference: ${orderResult.orderNumber}\n\nPlease confirm my payment.`;
+    const phone = '218915666605';
+    const msg = `مرحباً OMCS,\n\nلقد أتممت التحويل البنكي.\n\nرقم الطلب: ${orderResult.orderNumber}\nالمبلغ: ${formatPrice(orderResult.total)} د.ل\nالمرجع: ${orderResult.orderNumber}\n\nيرجى تأكيد الدفع.`;
     return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
   };
   const fmtCountdown = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
@@ -289,8 +289,8 @@ export default function StorefrontPage() {
           )}
           {/* Badges */}
           <div className="card-badges">
-            {isLow && <span className="badge-selling-fast">Only {p.totalStock} left</span>}
-            {!isLow && isSelling && <span className="badge-new">Selling Fast</span>}
+            {isLow && <span className="badge-selling-fast">باقي {p.totalStock} فقط</span>}
+            {!isLow && isSelling && <span className="badge-new">يباع بسرعة</span>}
           </div>
           {/* Wishlist */}
           <button className="card-wishlist" onClick={e => e.stopPropagation()}>♡</button>
@@ -298,7 +298,7 @@ export default function StorefrontPage() {
           {p.inStock && (
             <div className="card-overlay">
               <button className="quick-add-btn" onClick={e => quickAdd(e, p)}>
-                + Quick Add
+                + إضافة سريعة
               </button>
             </div>
           )}
@@ -316,10 +316,10 @@ export default function StorefrontPage() {
           )}
           <div className="price-row">
             <span className="price">
-              {formatPrice(p.minPrice)} <small>LYD</small>
+              {formatPrice(p.minPrice)} <small>د.ل</small>
               {p.maxPrice > p.minPrice && <> – {formatPrice(p.maxPrice)}</>}
             </span>
-            {isLow && <span className="stock-badge low">{p.totalStock} left!</span>}
+            {isLow && <span className="stock-badge low">باقي {p.totalStock}!</span>}
           </div>
         </div>
       </div>
@@ -335,12 +335,12 @@ export default function StorefrontPage() {
       <header className="header">
         <div className="header-inner">
           <button className="logo" onClick={() => { setPage('shop'); setProductDetail(null); }}>
-            <img src="/logo.png" alt="Outlet Master" className="logo-img" />
+            <img src="/logo.png" alt="OMCS" className="logo-img" />
           </button>
           <div className="search-bar">
             <span className="search-icon">🔍</span>
             <input
-              placeholder="Search products, brands..."
+              placeholder="ابحث عن منتجات، ماركات..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               onFocus={() => setPage('shop')}
@@ -349,11 +349,11 @@ export default function StorefrontPage() {
           <div className="header-actions">
             <button className="btn btn-outline" style={{ padding: '7px 16px', fontSize: '.82rem', borderRadius: 100 }}
               onClick={() => { setPage('track'); setTrackResult(null); }}>
-              Track Order
+              تتبع الطلب
             </button>
             <button className="cart-btn" onClick={() => setCartOpen(true)}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 01-8 0" /></svg>
-              Bag
+              السلة
               {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
             </button>
           </div>
@@ -391,7 +391,7 @@ export default function StorefrontPage() {
               <h1 className="gradient-text">{HERO_SLIDES[heroSlide].title}</h1>
               <p>{HERO_SLIDES[heroSlide].subtitle}</p>
               <button className="hero-cta" onClick={scrollToProducts}>
-                Shop Now
+                تسوق الآن
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
               </button>
             </div>
@@ -407,18 +407,18 @@ export default function StorefrontPage() {
             <div className="marquee-track">
               {[...Array(2)].map((_, idx) => (
                 <span key={idx} style={{ display: 'contents' }}>
-                  <span>🚚 Free Delivery Across Libya</span><span className="dot" />
-                  <span>🔒 Secure Payment</span><span className="dot" />
-                  <span>✦ 100% Authentic Brands</span><span className="dot" />
-                  <span>↩️ Easy Returns</span><span className="dot" />
-                  <span>⚡ New Arrivals Weekly</span><span className="dot" />
-                  <span>🏆 Premium Quality</span><span className="dot" />
-                  <span>🚚 Free Delivery Across Libya</span><span className="dot" />
-                  <span>🔒 Secure Payment</span><span className="dot" />
-                  <span>✦ 100% Authentic Brands</span><span className="dot" />
-                  <span>↩️ Easy Returns</span><span className="dot" />
-                  <span>⚡ New Arrivals Weekly</span><span className="dot" />
-                  <span>🏆 Premium Quality</span><span className="dot" />
+                  <span>🚚 توصيل مجاني في جميع أنحاء ليبيا</span><span className="dot" />
+                  <span>🔒 دفع آمن</span><span className="dot" />
+                  <span>✦ ماركات أصلية 100%</span><span className="dot" />
+                  <span>↩️ إرجاع سهل</span><span className="dot" />
+                  <span>⚡ وصول جديد أسبوعياً</span><span className="dot" />
+                  <span>🏆 جودة عالية</span><span className="dot" />
+                  <span>🚚 توصيل مجاني في جميع أنحاء ليبيا</span><span className="dot" />
+                  <span>🔒 دفع آمن</span><span className="dot" />
+                  <span>✦ ماركات أصلية 100%</span><span className="dot" />
+                  <span>↩️ إرجاع سهل</span><span className="dot" />
+                  <span>⚡ وصول جديد أسبوعياً</span><span className="dot" />
+                  <span>🏆 جودة عالية</span><span className="dot" />
                 </span>
               ))}
             </div>
@@ -429,11 +429,11 @@ export default function StorefrontPage() {
             <section className="container" style={{ paddingTop: 48 }}>
               <div className="section-header">
                 <div>
-                  <h2 className="section-title">Best Sellers</h2>
-                  <p className="section-subtitle">Our most popular products this week</p>
+                  <h2 className="section-title">الأكثر مبيعاً</h2>
+                  <p className="section-subtitle">المنتجات الأكثر شعبية هذا الأسبوع</p>
                 </div>
                 <button className="section-link" onClick={scrollToProducts}>
-                  View All →
+                  عرض الكل ←
                 </button>
               </div>
               <div className="products-grid">
@@ -449,8 +449,8 @@ export default function StorefrontPage() {
             <section className="container" style={{ paddingTop: 8 }}>
               <div className="section-header">
                 <div>
-                  <h2 className="section-title" style={{ color: 'var(--red)' }}>🔥 Selling Fast</h2>
-                  <p className="section-subtitle">Grab them before they're gone — limited stock!</p>
+                  <h2 className="section-title" style={{ color: 'var(--red)' }}>🔥 يباع بسرعة</h2>
+                  <p className="section-subtitle">احصل عليها قبل نفاد الكمية — مخزون محدود!</p>
                 </div>
               </div>
               <div className="products-grid">
@@ -464,13 +464,13 @@ export default function StorefrontPage() {
           {/* ─── ALL PRODUCTS ─── */}
           <div className="container" id="products-section" style={{ paddingTop: 48 }}>
             <div className="section-header">
-              <h2 className="section-title">Shop All</h2>
+              <h2 className="section-title">جميع المنتجات</h2>
             </div>
 
             {/* Filters */}
             <div className="filters-bar">
               <button className={`filter-chip ${!selectedCategory ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('')}>All</button>
+                onClick={() => setSelectedCategory('')}>الكل</button>
               {categories.map((c: any) => (
                 <button key={c.id}
                   className={`filter-chip ${selectedCategory === c.id ? 'active' : ''}`}
@@ -481,16 +481,16 @@ export default function StorefrontPage() {
               {brands.length > 0 && (
                 <select className="filter-select" value={selectedBrand}
                   onChange={e => setSelectedBrand(e.target.value)}>
-                  <option value="">All Brands</option>
+                  <option value="">جميع الماركات</option>
                   {brands.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
               )}
               <select className="filter-select" value={sort}
                 onChange={e => setSort(e.target.value)}>
-                <option value="newest">Newest</option>
-                <option value="price_asc">Price: Low → High</option>
-                <option value="price_desc">Price: High → Low</option>
-                <option value="name">Name A-Z</option>
+                <option value="newest">الأحدث</option>
+                <option value="price_asc">السعر: من الأقل</option>
+                <option value="price_desc">السعر: من الأعلى</option>
+                <option value="name">الاسم أ-ي</option>
               </select>
             </div>
 
@@ -511,8 +511,8 @@ export default function StorefrontPage() {
             ) : products.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 80, color: 'var(--text-muted)' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: 12, opacity: .4 }}>🔍</div>
-                <div style={{ fontSize: '1rem', fontWeight: 600 }}>No products found</div>
-                <div style={{ fontSize: '.88rem', marginTop: 6 }}>Try adjusting your search or filters</div>
+                <div style={{ fontSize: '1rem', fontWeight: 600 }}>لم يتم العثور على منتجات</div>
+                <div style={{ fontSize: '.88rem', marginTop: 6 }}>حاول تعديل البحث أو الفلاتر</div>
               </div>
             ) : (
               <div className="products-grid">
@@ -575,13 +575,13 @@ export default function StorefrontPage() {
                 <h2>{productDetail.name}</h2>
                 {selectedVariant && (
                   <div className="detail-price">
-                    {formatPrice(selectedVariant.salePrice)} <small>LYD</small>
+                    {formatPrice(selectedVariant.salePrice)} <small>د.ل</small>
                   </div>
                 )}
                 {/* Size selector */}
                 {productDetail.variants.some(v => v.size) && (
                   <div className="variant-selector">
-                    <h4>Size</h4>
+                    <h4>المقاس</h4>
                     <div className="variant-options">
                       {productDetail.variants.map(v => (
                         <button key={v.id}
@@ -597,7 +597,7 @@ export default function StorefrontPage() {
                 )}
                 {/* Quantity */}
                 <div className="qty-selector">
-                  <label>Quantity</label>
+                  <label>الكمية</label>
                   <div className="qty-controls">
                     <button onClick={() => setAddQty(Math.max(1, addQty - 1))}>−</button>
                     <span>{addQty}</span>
@@ -608,17 +608,17 @@ export default function StorefrontPage() {
                 <button className="btn btn-primary btn-full"
                   disabled={!selectedVariant || !selectedVariant.inStock}
                   onClick={() => selectedVariant && addToCart(selectedVariant)}>
-                  Add to Bag — {selectedVariant ? formatPrice(selectedVariant.salePrice * addQty) : 0} LYD
+                  أضف إلى السلة — {selectedVariant ? formatPrice(selectedVariant.salePrice * addQty) : 0} د.ل
                 </button>
                 {/* Stock */}
                 {selectedVariant && selectedVariant.totalStock <= 5 && selectedVariant.inStock && (
                   <div style={{ marginTop: 12, fontSize: '.82rem', color: 'var(--danger)', fontWeight: 600 }}>
-                    ⚡ Only {selectedVariant.totalStock} left in stock
+                    ⚡ باقي {selectedVariant.totalStock} فقط في المخزون
                   </div>
                 )}
                 {selectedVariant && selectedVariant.branches && selectedVariant.branches.length > 0 && (
                   <div style={{ marginTop: 12, fontSize: '.82rem', color: 'var(--text-muted)' }}>
-                    Available at: {selectedVariant.branches.map(b => b.branchName).join(', ')}
+                    متوفر في: {selectedVariant.branches.map(b => b.branchName).join('، ')}
                   </div>
                 )}
               </div>
@@ -632,26 +632,26 @@ export default function StorefrontPage() {
       {/* ═══════════════════════════════════════════════════════ */}
       {page === 'checkout' && (
         <div className="container">
-          <h2 className="section-title" style={{ marginTop: 32, marginBottom: 24 }}>Checkout</h2>
+          <h2 className="section-title" style={{ marginTop: 32, marginBottom: 24 }}>إتمام الطلب</h2>
           <div className="checkout-layout">
             <div>
               {/* Contact */}
               <div className="form-section">
-                <h3>Contact Information</h3>
+                <h3>معلومات الاتصال</h3>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Full Name *</label>
+                    <label>الاسم الكامل *</label>
                     <input value={form.customerName} onChange={e => setForm({ ...form, customerName: e.target.value })}
                       placeholder="محمد أحمد" />
                   </div>
                   <div className="form-group">
-                    <label>Phone Number *</label>
+                    <label>رقم الهاتف *</label>
                     <input value={form.customerPhone} onChange={e => setForm({ ...form, customerPhone: e.target.value })}
                       placeholder="091XXXXXXX" />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>Email (optional)</label>
+                  <label>البريد الإلكتروني (اختياري)</label>
                   <input type="email" value={form.customerEmail}
                     onChange={e => setForm({ ...form, customerEmail: e.target.value })}
                     placeholder="email@example.com" />
@@ -660,13 +660,13 @@ export default function StorefrontPage() {
 
               {/* Shipping */}
               <div className="form-section">
-                <h3>Shipping Address</h3>
+                <h3>عنوان الشحن</h3>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>City *</label>
+                    <label>المدينة *</label>
                     <select value={form.shippingCity}
                       onChange={e => setForm({ ...form, shippingCity: e.target.value })}>
-                      <option value="">Select city...</option>
+                      <option value="">اختر المدينة...</option>
                       <option value="Tripoli">طرابلس — Tripoli</option>
                       <option value="Benghazi">بنغازي — Benghazi</option>
                       <option value="Misrata">مصراتة — Misrata</option>
@@ -676,46 +676,46 @@ export default function StorefrontPage() {
                       <option value="Khoms">الخمس — Khoms</option>
                       <option value="Gharyan">غريان — Gharyan</option>
                       <option value="Sebha">سبها — Sebha</option>
-                      <option value="Other">Other</option>
+                      <option value="Other">أخرى</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Delivery Company</label>
+                    <label>شركة التوصيل</label>
                     <select value={form.deliveryCompany}
                       onChange={e => setForm({ ...form, deliveryCompany: e.target.value })}>
-                      <option value="">Select...</option>
+                      <option value="">اختر...</option>
                       <option value="SPRINT">Sprint</option>
                       <option value="YALLA_DELIVERY">Yalla Delivery</option>
                       <option value="WASIL">Wasil</option>
-                      <option value="SELF_PICKUP">Self Pickup</option>
-                      <option value="OTHER">Other</option>
+                      <option value="SELF_PICKUP">استلام ذاتي</option>
+                      <option value="OTHER">أخرى</option>
                     </select>
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>Full Address *</label>
+                  <label>العنوان بالكامل *</label>
                   <textarea rows={3} value={form.shippingAddress}
                     onChange={e => setForm({ ...form, shippingAddress: e.target.value })}
-                    placeholder="Street name, building, apartment number..." />
+                    placeholder="اسم الشارع، المبنى، رقم الشقة..." />
                 </div>
                 <div className="form-group">
-                  <label>Notes (optional)</label>
+                  <label>ملاحظات (اختياري)</label>
                   <input value={form.addressNotes}
                     onChange={e => setForm({ ...form, addressNotes: e.target.value })}
-                    placeholder="Delivery instructions, landmarks..." />
+                    placeholder="تعليمات التوصيل، معالم..." />
                 </div>
               </div>
 
               {/* Payment */}
               <div className="form-section">
-                <h3>Payment Method</h3>
+                <h3>طريقة الدفع</h3>
                 <div className="payment-options">
                   <button className={`payment-option ${form.paymentMethod === 'BANK_TRANSFER' ? 'selected' : ''}`}
                     onClick={() => setForm({ ...form, paymentMethod: 'BANK_TRANSFER' })}>
                     <span className="pm-icon">🏦</span>
                     <div className="pm-info">
-                      <div className="pm-title">Bank Transfer</div>
-                      <div className="pm-desc">Transfer and confirm via WhatsApp</div>
+                      <div className="pm-title">تحويل بنكي</div>
+                      <div className="pm-desc">حوّل وأكد عبر الواتساب</div>
                     </div>
                   </button>
                   {/* ARCHIVED: Card Payment — uncomment when ready to implement
@@ -772,14 +772,14 @@ export default function StorefrontPage() {
 
               <button className="btn btn-primary btn-full" onClick={handleCheckout} disabled={checkoutLoading}
                 style={{ padding: '16px 28px', fontSize: '.95rem' }}>
-                {checkoutLoading ? <><span className="spinner" /> Placing Order...</> : `Place Order — ${formatPrice(cartSubtotal)} LYD`}
+                {checkoutLoading ? <><span className="spinner" /> جاري إرسال الطلب...</> : `إرسال الطلب — ${formatPrice(cartSubtotal)} د.ل`}
               </button>
             </div>
 
             {/* Order Summary */}
             <div>
               <div className="order-summary-card">
-                <h3>Order Summary ({cartCount} items)</h3>
+                <h3>ملخص الطلب ({cartCount} منتجات)</h3>
                 {cart.items.map(item => (
                   <div key={item.variantId} className="summary-item">
                     <div className="s-thumb">
@@ -789,13 +789,13 @@ export default function StorefrontPage() {
                       <div className="s-name">{item.productName}</div>
                       <div className="s-meta">{[item.size, item.color].filter(Boolean).join(' / ')} × {item.quantity}</div>
                     </div>
-                    <div className="s-price">{formatPrice(item.salePrice * item.quantity)} LYD</div>
+                    <div className="s-price">{formatPrice(item.salePrice * item.quantity)} د.ل</div>
                   </div>
                 ))}
                 <div className="cart-totals" style={{ marginTop: 14 }}>
-                  <div className="row"><span>Subtotal</span><span>{formatPrice(cartSubtotal)} LYD</span></div>
-                  <div className="row"><span>Delivery</span><span style={{ color: 'var(--text-muted)' }}>Calculated by admin</span></div>
-                  <div className="row total"><span>Total</span><span>{formatPrice(cartSubtotal)} LYD</span></div>
+                  <div className="row"><span>المجموع الفرعي</span><span>{formatPrice(cartSubtotal)} د.ل</span></div>
+                  <div className="row"><span>التوصيل</span><span style={{ color: 'var(--text-muted)' }}>يحدد لاحقاً</span></div>
+                  <div className="row total"><span>الإجمالي</span><span>{formatPrice(cartSubtotal)} د.ل</span></div>
                 </div>
               </div>
             </div>
@@ -808,15 +808,15 @@ export default function StorefrontPage() {
       {/* ═══════════════════════════════════════════════════════ */}
       {page === 'success' && orderResult && (
         <div className="success-page">
-          <img src="/logo.png" alt="Outlet Master" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 16px', display: 'block' }} />
+          <img src="/logo.png" alt="OMCS" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 16px', display: 'block' }} />
           <div className="success-icon">✅</div>
-          <h1>Order Placed Successfully!</h1>
+          <h1>تم تأكيد طلبك بنجاح!</h1>
           <p style={{ color: 'var(--text-secondary)', maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
             {orderResult.message}
           </p>
           <div className="order-number">{orderResult.orderNumber}</div>
           <p style={{ fontSize: '.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
-            Save this number to track your order.
+            احفظ هذا الرقم لتتبع طلبك.
           </p>
 
           {/* Countdown */}
@@ -829,11 +829,11 @@ export default function StorefrontPage() {
             }}>
               {reservationExpired ? (
                 <div style={{ fontSize: '.85rem', color: '#991b1b', fontWeight: 700 }}>
-                  ⚠️ Reservation expired — please place a new order.
+                  ⚠️ انتهى الحجز — يرجى تقديم طلب جديد.
                 </div>
               ) : (
                 <div style={{ fontSize: '.85rem', color: '#1e40af', fontWeight: 600 }}>
-                  ⏱️ Items reserved for <strong style={{ fontFamily: 'monospace', fontSize: '1rem' }}>{fmtCountdown(reservationRemaining)}</strong>
+                  ⏱️ المنتجات محجوزة لمدة <strong style={{ fontFamily: 'monospace', fontSize: '1rem' }}>{fmtCountdown(reservationRemaining)}</strong>
                 </div>
               )}
             </div>
@@ -845,18 +845,18 @@ export default function StorefrontPage() {
               background: '#fffbeb', border: '1.5px solid #f59e0b',
               borderRadius: 12, padding: 20, maxWidth: 460, margin: '0 auto 20px', textAlign: 'left',
             }}>
-              <h3 style={{ color: '#92400e', fontSize: '.95rem', marginBottom: 10, fontWeight: 700 }}>🏦 Bank Transfer Required</h3>
+              <h3 style={{ color: '#92400e', fontSize: '.95rem', marginBottom: 10, fontWeight: 700 }}>🏦 مطلوب تحويل بنكي</h3>
               <p style={{ fontSize: '.85rem', color: '#78350f', lineHeight: 1.7, marginBottom: 10 }}>
-                Transfer <strong>{formatPrice(orderResult.total)} LYD</strong> to:
+                حوّل مبلغ <strong>{formatPrice(orderResult.total)} د.ل</strong> إلى:
               </p>
               <div style={{ background: 'rgba(255,255,255,.7)', borderRadius: 8, padding: 12, fontSize: '.82rem', lineHeight: 1.8, color: '#78350f' }}>
-                <div><strong>Bank:</strong> Jumhouria Bank</div>
-                <div><strong>Account:</strong> XXXX-XXXX-XXXX</div>
-                <div><strong>Name:</strong> Outlet Master</div>
-                <div><strong>Reference:</strong> {orderResult.orderNumber}</div>
+                <div><strong>البنك:</strong> مصرف الجمهورية</div>
+                <div><strong>رقم الحساب:</strong> XXXX-XXXX-XXXX</div>
+                <div><strong>الاسم:</strong> OMCS</div>
+                <div><strong>المرجع:</strong> {orderResult.orderNumber}</div>
               </div>
               <p style={{ fontSize: '.8rem', color: '#92400e', marginTop: 10, fontStyle: 'italic' }}>
-                After transferring, confirm via the button below.
+                بعد التحويل، أكد عبر الزر أدناه.
               </p>
             </div>
           )}
@@ -878,7 +878,7 @@ export default function StorefrontPage() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
-                {reservationExpired ? 'Reservation Expired' : 'Confirm Payment via WhatsApp'}
+                {reservationExpired ? 'انتهى الحجز' : 'تأكيد الدفع عبر الواتساب'}
               </a>
             </div>
           )}
@@ -887,7 +887,7 @@ export default function StorefrontPage() {
           {orderResult.paymentMethod === 'COD' && (
             <div style={{ background: '#ecfdf5', border: '1.5px solid #10b981', borderRadius: 12, padding: 18, maxWidth: 460, margin: '0 auto 20px', textAlign: 'center' }}>
               <p style={{ fontSize: '.88rem', color: '#065f46', fontWeight: 600 }}>
-                💵 Cash on Delivery — Pay <strong>{formatPrice(orderResult.total)} LYD</strong> upon receipt.
+                💵 الدفع عند الاستلام — ادفع <strong>{formatPrice(orderResult.total)} د.ل</strong> عند التسليم.
               </p>
             </div>
           )}
@@ -896,14 +896,14 @@ export default function StorefrontPage() {
           {orderResult.paymentMethod === 'CARD' && (
             <div style={{ background: '#f5f3ff', border: '1.5px solid #8b5cf6', borderRadius: 12, padding: 18, maxWidth: 460, margin: '0 auto 20px', textAlign: 'center' }}>
               <p style={{ fontSize: '.88rem', color: '#4c1d95', fontWeight: 600 }}>
-                💳 Payment Confirmed — <strong>{formatPrice(orderResult.total)} LYD</strong> charged.
+                💳 تم تأكيد الدفع — تم خصم <strong>{formatPrice(orderResult.total)} د.ل</strong>.
               </p>
             </div>
           )}
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 8 }}>
             <button className="btn btn-primary" onClick={() => { setPage('shop'); setOrderResult(null); }}>
-              Continue Shopping
+              متابعة التسوق
             </button>
             <button className="btn btn-outline" onClick={() => {
               setTrackNumber(orderResult.orderNumber); setPage('track');
@@ -914,7 +914,7 @@ export default function StorefrontPage() {
                 finally { setTrackLoading(false); }
               }, 100);
             }}>
-              Track Order
+              تتبع الطلب
             </button>
           </div>
         </div>
@@ -925,13 +925,13 @@ export default function StorefrontPage() {
       {/* ═══════════════════════════════════════════════════════ */}
       {page === 'track' && (
         <div className="track-page">
-          <h2 className="section-title" style={{ textAlign: 'center' }}>Track Your Order</h2>
+          <h2 className="section-title" style={{ textAlign: 'center' }}>تتبع طلبك</h2>
           <div className="track-input-group">
-            <input placeholder="Enter order number (OMC-...)" value={trackNumber}
+            <input placeholder="أدخل رقم الطلب (OMC-...)" value={trackNumber}
               onChange={e => setTrackNumber(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleTrack()} />
             <button className="btn btn-primary" onClick={handleTrack} disabled={trackLoading}>
-              {trackLoading ? <span className="spinner" /> : 'Track'}
+              {trackLoading ? <span className="spinner" /> : 'تتبع'}
             </button>
           </div>
 
@@ -972,15 +972,15 @@ export default function StorefrontPage() {
                 </div>
               )}
               <div style={{ marginTop: 18 }}>
-                <h4 style={{ fontWeight: 700, marginBottom: 8, fontSize: '.88rem' }}>Items</h4>
+                <h4 style={{ fontWeight: 700, marginBottom: 8, fontSize: '.88rem' }}>المنتجات</h4>
                 {trackResult.items?.map((item: any, i: number) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: '.88rem' }}>
                     <span>{item.productName} {item.size && `(${item.size})`} × {item.quantity}</span>
-                    <span style={{ fontWeight: 700 }}>{formatPrice(item.lineTotal)} LYD</span>
+                    <span style={{ fontWeight: 700 }}>{formatPrice(item.lineTotal)} د.ل</span>
                   </div>
                 ))}
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', fontWeight: 800, fontSize: '1.05rem' }}>
-                  <span>Total</span><span>{formatPrice(trackResult.total)} LYD</span>
+                  <span>الإجمالي</span><span>{formatPrice(trackResult.total)} د.ل</span>
                 </div>
               </div>
             </div>
@@ -996,14 +996,14 @@ export default function StorefrontPage() {
           <div className="cart-drawer-overlay" onClick={() => setCartOpen(false)} />
           <div className="cart-drawer">
             <div className="cart-header">
-              <h3>Bag ({cartCount})</h3>
+              <h3>السلة ({cartCount})</h3>
               <button className="modal-close" onClick={() => setCartOpen(false)}>✕</button>
             </div>
             {cart.items.length === 0 ? (
               <div className="cart-empty">
                 <div className="empty-icon">🛍️</div>
-                <div style={{ fontWeight: 600, marginBottom: 4 }}>Your bag is empty</div>
-                <div style={{ fontSize: '.85rem' }}>Browse our collection and add items</div>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>سلتك فارغة</div>
+                <div style={{ fontSize: '.85rem' }}>تصفح مجموعتنا وأضف منتجات</div>
               </div>
             ) : (
               <>
@@ -1024,7 +1024,7 @@ export default function StorefrontPage() {
                             onClick={() => cart.updateQuantity(item.variantId, item.quantity + 1)}>+</button>
                         </div>
                         <div className="item-price" style={{ marginTop: 2 }}>
-                          {formatPrice(item.salePrice * item.quantity)} LYD
+                          {formatPrice(item.salePrice * item.quantity)} د.ل
                         </div>
                       </div>
                       <button className="item-remove" onClick={() => cart.removeItem(item.variantId)}>✕</button>
@@ -1033,13 +1033,13 @@ export default function StorefrontPage() {
                 </div>
                 <div className="cart-footer">
                   <div className="cart-totals">
-                    <div className="row"><span>Subtotal</span><span>{formatPrice(cartSubtotal)} LYD</span></div>
-                    <div className="row"><span>Delivery</span><span style={{ color: 'var(--text-muted)' }}>TBD</span></div>
-                    <div className="row total"><span>Total</span><span>{formatPrice(cartSubtotal)} LYD</span></div>
+                    <div className="row"><span>المجموع الفرعي</span><span>{formatPrice(cartSubtotal)} د.ل</span></div>
+                    <div className="row"><span>التوصيل</span><span style={{ color: 'var(--text-muted)' }}>يحدد لاحقاً</span></div>
+                    <div className="row total"><span>الإجمالي</span><span>{formatPrice(cartSubtotal)} د.ل</span></div>
                   </div>
                   <button className="btn btn-primary btn-full"
                     onClick={() => { setCartOpen(false); setPage('checkout'); }}>
-                    Checkout →
+                    إتمام الطلب ←
                   </button>
                 </div>
               </>
@@ -1056,9 +1056,9 @@ export default function StorefrontPage() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -3 }}>
               <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 01-8 0" />
             </svg>
-            {' '}{cartCount} items
+            {' '}{cartCount} منتجات
           </div>
-          <div style={{ fontWeight: 800 }}>{formatPrice(cartSubtotal)} LYD →</div>
+          <div style={{ fontWeight: 800 }}>{formatPrice(cartSubtotal)} د.ل ←</div>
         </div>
       )}
 
@@ -1067,35 +1067,35 @@ export default function StorefrontPage() {
         <footer className="footer">
           <div className="footer-grid">
             <div>
-              <img src="/logo.png" alt="Outlet Master" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', marginBottom: 12 }} />
-              <div style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: 10, color: '#fff' }}>Outlet Master</div>
+              <img src="/logo.png" alt="OMCS" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', marginBottom: 12 }} />
+              <div style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: 10, color: '#fff' }}>OMCS</div>
               <p style={{ fontSize: '.85rem', lineHeight: 1.7 }}>
-                Premium fashion and lifestyle products at outlet prices.
-                Serving customers across Libya with fast delivery.
+                أزياء وماركات عالمية بأسعار الأوتلت.
+                نخدم عملاءنا في جميع أنحاء ليبيا بتوصيل سريع.
               </p>
             </div>
             <div>
-              <h4>Shop</h4>
-              <a href="#">New Arrivals</a>
-              <a href="#">Shoes</a>
-              <a href="#">Clothing</a>
-              <a href="#">Accessories</a>
+              <h4>تسوق</h4>
+              <a href="#">وصل حديثاً</a>
+              <a href="#">أحذية</a>
+              <a href="#">ملابس</a>
+              <a href="#">إكسسوارات</a>
             </div>
             <div>
-              <h4>Support</h4>
-              <a href="#" onClick={e => { e.preventDefault(); setPage('track'); }}>Track Order</a>
-              <a href="#">Returns Policy</a>
-              <a href="#">Contact Us</a>
+              <h4>الدعم</h4>
+              <a href="#" onClick={e => { e.preventDefault(); setPage('track'); }}>تتبع الطلب</a>
+              <a href="#">سياسة الإرجاع</a>
+              <a href="#">اتصل بنا</a>
             </div>
             <div>
-              <h4>Contact</h4>
-              <a href="#">📱 091-XXXXXXX</a>
-              <a href="#">📧 info@outletmaster.ly</a>
-              <a href="#">📍 Tripoli, Libya</a>
+              <h4>تواصل معنا</h4>
+              <a href="https://wa.me/218915666605" target="_blank" rel="noopener noreferrer">📱 +218 91 566 6605</a>
+              <a href="mailto:info@omcs.com.ly">📧 info@omcs.com.ly</a>
+              <a href="#">📍 طرابلس، ليبيا</a>
             </div>
           </div>
           <div className="footer-bottom">
-            © 2026 Outlet Master. All rights reserved.
+            © 2026 OMCS. جميع الحقوق محفوظة.
           </div>
         </footer>
       )}

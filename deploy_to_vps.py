@@ -1,37 +1,43 @@
-"""Test all OMCS login accounts"""
+"""OMCS VPS - Rebuild backend only"""
 import paramiko
+import time
 
 HOST = "102.203.200.71"
 USER = "root"
 PASS = "Omcs@2025Secure!"
 
-accounts = [
-    ("owner@omcs.com.ly", "Owner@2026!", "Owner"),
-    ("manager@omcs.com.ly", "Manager@2026!", "Manager"),
-    ("cashier1@omcs.com.ly", "Cashier@2026!", "Cashier 1"),
-    ("cashier2@omcs.com.ly", "Cashier@2026!", "Cashier 2"),
-    ("cashier3@omcs.com.ly", "Cashier@2026!", "Cashier 3"),
-    ("cashier4@omcs.com.ly", "Cashier@2026!", "Cashier 4"),
-]
+def run_cmd(ssh, cmd, timeout=300):
+    print(f"\n>> {cmd[:120]}")
+    stdin, stdout, stderr = ssh.exec_command(cmd, timeout=timeout)
+    out = stdout.read().decode('utf-8', errors='replace')
+    err = stderr.read().decode('utf-8', errors='replace')
+    safe = (out + err).encode('ascii', errors='replace').decode('ascii')
+    if safe.strip():
+        lines = safe.strip().split('\n')
+        if len(lines) > 15:
+            print(f"  ... ({len(lines) - 15} lines hidden)")
+        for line in lines[-15:]:
+            print(f"  {line}")
+    exit_code = stdout.channel.recv_exit_status()
+    print(f"  [{'OK' if exit_code == 0 else 'WARN: ' + str(exit_code)}]")
+    return exit_code, out, err
 
 def main():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(HOST, username=USER, password=PASS, timeout=30)
-    print("[OK] Connected!\n")
+    print("[OK] Connected!")
 
-    for email, password, name in accounts:
-        cmd = f"""curl -s -X POST http://localhost:4000/api/auth/login -H 'Content-Type: application/json' -d '{{"email":"{email}","password":"{password}"}}' """
-        stdin, stdout, stderr = ssh.exec_command(cmd, timeout=10)
-        out = stdout.read().decode('utf-8', errors='replace')
-        
-        if "accessToken" in out:
-            print(f"  [OK] {name:12s} | {email:28s} | {password}")
-        else:
-            safe = out.encode('ascii', errors='replace').decode('ascii')
-            print(f"  [FAIL] {name:12s} | {email:28s} | {safe[:80]}")
-
-    print("\nAll accounts above are ready to use at http://admin.omcs.com.ly")
+    run_cmd(ssh, "cd /opt/omcs && git pull origin main")
+    run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml up -d --build omcs-backend", timeout=600)
+    
+    print("\n  Waiting 15s for backend to start...")
+    time.sleep(15)
+    
+    run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml ps")
+    run_cmd(ssh, "curl -s -o /dev/null -w 'API: %{http_code}' http://localhost:4000/api/docs; echo")
+    
+    print("\n  Backend rebuilt with product-level alerts!")
     ssh.close()
 
 if __name__ == "__main__":
