@@ -27,13 +27,26 @@ export class InventoryService {
     }
 
     async getAlerts() {
-        return this.invRepo.createQueryBuilder('i')
-            .leftJoinAndSelect('i.variant', 'v')
-            .leftJoinAndSelect('v.product', 'p')
-            .leftJoinAndSelect('i.branch', 'b')
-            .where('i.quantity <= i.lowStockThreshold')
-            .orderBy('i.quantity', 'ASC')
-            .getMany();
+        // Alert based on PRODUCT-level total (all sizes combined), not per variant
+        const qb = this.invRepo.createQueryBuilder('i')
+            .leftJoin('i.variant', 'v')
+            .leftJoin('v.product', 'p')
+            .leftJoin('i.branch', 'b')
+            .select('p.id', 'productId')
+            .addSelect('p.name', 'productName')
+            .addSelect('p.brand', 'brand')
+            .addSelect('b.id', 'branchId')
+            .addSelect('b.name', 'branchName')
+            .addSelect('SUM(i.quantity)', 'totalQty')
+            .addSelect('MIN(i.low_stock_threshold)', 'threshold')
+            .groupBy('p.id')
+            .addGroupBy('p.name')
+            .addGroupBy('p.brand')
+            .addGroupBy('b.id')
+            .addGroupBy('b.name')
+            .having('SUM(i.quantity) <= MIN(i.low_stock_threshold)')
+            .orderBy('SUM(i.quantity)', 'ASC');
+        return qb.getRawMany();
     }
 
     async getGrouped(branchId?: string, filters?: {
@@ -362,18 +375,27 @@ export class InventoryService {
             });
             this.events.emitTransferShipped(transfer);
 
-            // Low stock alert
-            if (srcAfter > 0 && srcAfter <= (srcBatches[0]?.lowStockThreshold || 5)) {
-                const variant = await em.findOne(ProductVariant, { where: { id: transfer.variantId }, relations: ['product'] });
-                this.events.server?.emit('stock.alert', {
-                    variantId: transfer.variantId,
-                    sku: variant?.sku,
-                    productName: variant?.product?.name,
-                    branchId: transfer.fromBranchId,
-                    quantity: srcAfter,
-                    threshold: srcBatches[0]?.lowStockThreshold || 5,
-                    message: `Low stock after transfer: ${variant?.sku} — ${srcAfter} left`,
-                });
+            // Low stock alert — check PRODUCT-level total (all sizes combined)
+            const variant = await em.findOne(ProductVariant, { where: { id: transfer.variantId }, relations: ['product'] });
+            if (variant?.product?.id) {
+                const productTotal = await em.createQueryBuilder(Inventory, 'i')
+                    .leftJoin('i.variant', 'v')
+                    .where('v.product_id = :pid', { pid: variant.product.id })
+                    .andWhere('i.branch_id = :bid', { bid: transfer.fromBranchId })
+                    .select('SUM(i.quantity)', 'total')
+                    .getRawOne();
+                const totalQty = Number(productTotal?.total || 0);
+                const threshold = srcBatches[0]?.lowStockThreshold || 5;
+                if (totalQty > 0 && totalQty <= threshold) {
+                    this.events.server?.emit('stock.alert', {
+                        productId: variant.product.id,
+                        productName: variant.product.name,
+                        branchId: transfer.fromBranchId,
+                        quantity: totalQty,
+                        threshold,
+                        message: `Low stock: ${variant.product.name} — ${totalQty} total left (all sizes)`,
+                    });
+                }
             }
 
             return transfer;
@@ -616,18 +638,27 @@ export class InventoryService {
             this.events.emitInventoryUpdated({ variantId, branchId: fromBranchId, quantity: srcAfter });
             this.events.emitInventoryUpdated({ variantId, branchId: toBranchId, quantity: dstAfter });
 
-            // 8. Low stock alert check
+            // 8. Low stock alert check — PRODUCT-level total (all sizes combined)
             const variant = await em.findOne(ProductVariant, { where: { id: variantId }, relations: ['product'] });
-            if (srcAfter > 0 && srcAfter <= (srcBatches[0]?.lowStockThreshold || 5)) {
-                this.events.server?.emit('stock.alert', {
-                    variantId,
-                    sku: variant?.sku,
-                    productName: variant?.product?.name,
-                    branchId: fromBranchId,
-                    quantity: srcAfter,
-                    threshold: srcBatches[0]?.lowStockThreshold || 5,
-                    message: `Low stock: ${variant?.sku} (${variant?.product?.name}) — ${srcAfter} left`,
-                });
+            if (variant?.product?.id) {
+                const productTotal = await em.createQueryBuilder(Inventory, 'i')
+                    .leftJoin('i.variant', 'v')
+                    .where('v.product_id = :pid', { pid: variant.product.id })
+                    .andWhere('i.branch_id = :bid', { bid: fromBranchId })
+                    .select('SUM(i.quantity)', 'total')
+                    .getRawOne();
+                const totalQty = Number(productTotal?.total || 0);
+                const threshold = srcBatches[0]?.lowStockThreshold || 5;
+                if (totalQty > 0 && totalQty <= threshold) {
+                    this.events.server?.emit('stock.alert', {
+                        productId: variant.product.id,
+                        productName: variant.product.name,
+                        branchId: fromBranchId,
+                        quantity: totalQty,
+                        threshold,
+                        message: `Low stock: ${variant.product.name} — ${totalQty} total left (all sizes)`,
+                    });
+                }
             }
 
             return em.findOne(StockTransfer, {
@@ -683,39 +714,40 @@ export class InventoryService {
         return qb.orderBy('l.createdAt', 'DESC').limit(query?.limit || 200).getMany();
     }
 
-    // ─── Low Stock Alerts ───
+    // ─── Low Stock Alerts (PRODUCT-level: all sizes combined) ───
     async getLowStockAlerts(branchId?: string) {
-        // Consolidate across all batches for each variant+branch
+        // Group by PRODUCT+branch (not variant), so alert triggers when
+        // the last piece across ALL sizes in the product group is reached
         const qb = this.invRepo.createQueryBuilder('i')
-            .select('i.variant_id', 'variantId')
+            .leftJoin('i.variant', 'v')
+            .leftJoin('v.product', 'p')
+            .leftJoin('i.branch', 'b')
+            .select('p.id', 'productId')
+            .addSelect('p.name', 'productName')
+            .addSelect('p.brand', 'brand')
             .addSelect('i.branch_id', 'branchId')
+            .addSelect('b.name', 'branchName')
             .addSelect('SUM(i.quantity)', 'totalQty')
             .addSelect('MIN(i.low_stock_threshold)', 'threshold')
-            .groupBy('i.variant_id')
+            .groupBy('p.id')
+            .addGroupBy('p.name')
+            .addGroupBy('p.brand')
             .addGroupBy('i.branch_id')
+            .addGroupBy('b.name')
             .having('SUM(i.quantity) <= MIN(i.low_stock_threshold)')
             .andHaving('SUM(i.quantity) > 0');
         if (branchId) qb.andWhere('i.branch_id = :bid', { bid: branchId });
         const raw = await qb.getRawMany();
 
-        // Enrich with variant/product/branch data
-        const results: any[] = [];
-        for (const row of raw) {
-            const variant = await this.varRepo.findOne({ where: { id: row.variantId }, relations: ['product'] });
-            const inv = await this.invRepo.findOne({ where: { variantId: row.variantId, branchId: row.branchId }, relations: ['branch'] });
-            results.push({
-                variantId: row.variantId,
-                branchId: row.branchId,
-                branchName: inv?.branch?.name || '',
-                sku: variant?.sku || '',
-                productName: variant?.product?.name || '',
-                size: variant?.size || '',
-                color: variant?.color || '',
-                totalQuantity: Number(row.totalQty),
-                threshold: Number(row.threshold),
-            });
-        }
-        return results;
+        return raw.map(row => ({
+            productId: row.productId,
+            productName: row.productName,
+            brand: row.brand,
+            branchId: row.branchId,
+            branchName: row.branchName,
+            totalQuantity: Number(row.totalQty),
+            threshold: Number(row.threshold),
+        }));
     }
 
     // ─── Update low stock threshold ───
