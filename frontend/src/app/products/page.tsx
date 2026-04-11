@@ -819,7 +819,7 @@ export default function ProductsPage() {
                                     <div className="product-card__brand">{pm.brand}</div>
                                 )}
 
-                                {/* Sizes */}
+                                {/* المقاسات */}
                                 {pm.sizes.length > 0 && (
                                     <div className="product-card__sizes">
                                         {pm.sizes.slice(0, 6).map((s, i) => (
@@ -990,7 +990,7 @@ export default function ProductsPage() {
                                         <label className="form-label">{t('products.productName')}</label>
                                         <input className="form-input" value={newProduct.name}
                                             onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
-                                            placeholder="e.g. Nike Air Max 90" />
+                                            placeholder="مثال: هاتف آيفون 13" />
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">{t('products.nameArabicLabel')}</label>
@@ -999,13 +999,13 @@ export default function ProductsPage() {
                                             placeholder="الاسم بالعربي" dir="rtl" />
                                     </div>
                                     <div className="form-group">
-                                        <label className="form-label">Brand</label>
+                                        <label className="form-label">الماركة</label>
                                         <input className="form-input" value={newProduct.brand}
                                             onChange={e => setNewProduct({ ...newProduct, brand: e.target.value })}
-                                            placeholder="e.g. Nike" />
+                                            placeholder="مثال: أبل" />
                                     </div>
                                     <div className="form-group">
-                                        <label className="form-label">Category</label>
+                                        <label className="form-label">الفئة</label>
                                         <select className="form-input" value={newProduct.categoryId}
                                             onChange={e => handleCategoryChange(e.target.value)}>
                                             <option value="">{t('products.selectCategoryOption')}</option>
@@ -1019,12 +1019,12 @@ export default function ProductsPage() {
                         {/* ─── BULK VARIANT GENERATOR ─── */}
                         <div style={{ marginTop: 24, padding: 16, background: 'var(--bg-tertiary)', borderRadius: 12, border: '1px solid var(--border)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                                <span style={{ fontWeight: 700, fontSize: 15 }}>🏭 Bulk Variant Generator</span>
+                                <span style={{ fontWeight: 700, fontSize: 15 }}>🏭 مولد المتغيرات المجمعة</span>
                                 <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                                     {(['pick', 'matrix', 'range', 'paste'] as GeneratorMode[]).map(m => (
                                         <button key={m} onClick={() => setGenMode(m)}
                                             className={`btn btn-sm ${genMode === m ? 'btn-primary' : 'btn-secondary'}`}>
-                                            {m === 'pick' ? '👆 Quick Pick' : m === 'matrix' ? '🔢 Matrix' : m === 'range' ? '📏 Range' : '📋 Paste'}
+                                            {m === 'pick' ? '👆 اختيار سريع' : m === 'matrix' ? '🔢 مصفوفة' : m === 'range' ? '📏 نطاق' : '📋 لصق'}
                                         </button>
                                     ))}
                                 </div>
@@ -1033,7 +1033,7 @@ export default function ProductsPage() {
                             {genMode === 'pick' && (
                                 <div>
                                     <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-                                        Pick a category, then click sizes to select. Each selected size creates a variant.
+                                        اختر فئة، ثم انقر على المقاسات ليتم تحديدها. كل مقاس يمثل متغير مستقل.
                                     </p>
                                     {/* Preset category tabs */}
                                     <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
@@ -1073,10 +1073,10 @@ export default function ProductsPage() {
                                     </div>
                                     {/* Select all / Clear + Colors */}
                                     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 10, flexWrap: 'wrap' }}>
-                                        <button className="btn btn-secondary btn-sm" onClick={pickAll} style={{ fontSize: 11 }}>✅ All</button>
-                                        <button className="btn btn-secondary btn-sm" onClick={pickNone} style={{ fontSize: 11 }}>✕ Clear</button>
+                                        <button className="btn btn-secondary btn-sm" onClick={pickAll} style={{ fontSize: 11 }}>✅ الكل</button>
+                                        <button className="btn btn-secondary btn-sm" onClick={pickNone} style={{ fontSize: 11 }}>✕ مسح</button>
                                         <div className="form-group" style={{ marginBottom: 0, flex: 1, minWidth: 150 }}>
-                                            <label className="form-label">Colors (optional)</label>
+                                            <label className="form-label">الألوان (اختياري)</label>
                                             <input className="form-input" value={pickColors}
                                                 onChange={e => setPickColors(e.target.value)}
                                                 placeholder="Black, White, Grey" />
@@ -1084,15 +1084,15 @@ export default function ProductsPage() {
                                     </div>
                                     {pickedSizes.size > 0 && (
                                         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-                                            Selected: <strong style={{ color: 'var(--gold)' }}>{Array.from(pickedSizes).join(', ')}</strong>
-                                            {pickColors && ` × ${parseSeparated(pickColors).length} color(s)`}
+                                            المحدد: <strong style={{ color: 'var(--gold)' }}>{Array.from(pickedSizes).join(', ')}</strong>
+                                            {pickColors && ` × ${parseSeparated(pickColors).length} لون/ألوان`}
                                             {' → '}
-                                            <strong>{pickedSizes.size * Math.max(1, parseSeparated(pickColors).length)} variants</strong>
+                                            <strong>{pickedSizes.size * Math.max(1, parseSeparated(pickColors).length)} متغير</strong>
                                         </div>
                                     )}
                                     <button className="btn btn-primary btn-sm" onClick={generateFromPick}
                                         disabled={pickedSizes.size === 0}>
-                                        ⚡ Generate {pickedSizes.size * Math.max(1, parseSeparated(pickColors).length)} Variants
+                                        ⚡ توليد {pickedSizes.size * Math.max(1, parseSeparated(pickColors).length)} Variants
                                     </button>
                                 </div>
                             )}
@@ -1100,81 +1100,81 @@ export default function ProductsPage() {
                             {genMode === 'matrix' && (
                                 <div>
                                     <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-                                        Enter sizes and colors separated by commas or spaces. Each Size × Color combination creates a variant.
+                                        أدخل المقاسات والألوان مفصولة بفواصل أو مسافات. التقاطع بين المقاس واللون ينشئ متغيراً.
                                     </p>
                                     <div className="grid-2" style={{ marginBottom: 8 }}>
                                         <div className="form-group" style={{ marginBottom: 0 }}>
-                                            <label className="form-label">Sizes *</label>
+                                            <label className="form-label">المقاسات *</label>
                                             <input className="form-input" value={matrixSizes}
                                                 onChange={e => setMatrixSizes(e.target.value)}
                                                 placeholder="S, M, L, XL  or  40, 41, 42, 43" />
                                         </div>
                                         <div className="form-group" style={{ marginBottom: 0 }}>
-                                            <label className="form-label">Colors (optional)</label>
+                                            <label className="form-label">الألوان (اختياري)</label>
                                             <input className="form-input" value={matrixColors}
                                                 onChange={e => setMatrixColors(e.target.value)}
                                                 placeholder="Black, White, Grey" />
                                         </div>
                                     </div>
-                                    <button className="btn btn-primary btn-sm" onClick={generateMatrix}>⚡ Generate Variants</button>
+                                    <button className="btn btn-primary btn-sm" onClick={generateMatrix}>⚡ توليد Variants</button>
                                 </div>
                             )}
 
                             {genMode === 'range' && (
                                 <div>
                                     <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-                                        Generate sizes from a numeric range.
+                                        توليد المقاسات من خلال نطاق أرقام.
                                     </p>
                                     <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
                                         <div className="form-group" style={{ marginBottom: 0, flex: '0 0 100px' }}>
-                                            <label className="form-label">From</label>
+                                            <label className="form-label">من</label>
                                             <input type="number" className="form-input" value={rangeFrom}
                                                 onChange={e => setRangeFrom(e.target.value)} placeholder="36" />
                                         </div>
                                         <div className="form-group" style={{ marginBottom: 0, flex: '0 0 100px' }}>
-                                            <label className="form-label">To</label>
+                                            <label className="form-label">إلى</label>
                                             <input type="number" className="form-input" value={rangeTo}
                                                 onChange={e => setRangeTo(e.target.value)} placeholder="46" />
                                         </div>
                                         <div className="form-group" style={{ marginBottom: 0, flex: '0 0 80px' }}>
-                                            <label className="form-label">Step</label>
+                                            <label className="form-label">الخطوة</label>
                                             <input type="number" className="form-input" value={rangeStep}
                                                 onChange={e => setRangeStep(e.target.value)} placeholder="1" />
                                         </div>
                                         <div className="form-group" style={{ marginBottom: 0, flex: 1, minWidth: 150 }}>
-                                            <label className="form-label">Colors (optional)</label>
+                                            <label className="form-label">الألوان (اختياري)</label>
                                             <input className="form-input" value={rangeColors}
                                                 onChange={e => setRangeColors(e.target.value)} placeholder="Black, White" />
                                         </div>
                                     </div>
-                                    <button className="btn btn-primary btn-sm" onClick={generateRange}>⚡ Generate Variants</button>
+                                    <button className="btn btn-primary btn-sm" onClick={generateRange}>⚡ توليد Variants</button>
                                 </div>
                             )}
 
                             {genMode === 'paste' && (
                                 <div>
                                     <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-                                        Paste one variant per line: <code>size, color</code> or <code>size</code> only. Tab or comma separated.
+                                        الصق متغيراً واحداً في كل سطر: <code>المقاس، اللون</code> أو <code>المقاس</code> فقط. استخدم فواصل أو Tab.
                                     </p>
                                     <div className="form-group" style={{ marginBottom: 8 }}>
                                         <textarea className="form-input" rows={5} value={pasteText}
                                             onChange={e => setPasteText(e.target.value)}
                                             placeholder={"42, Black\n43, Black\n42, White\n43, White\nXL\n2XL"} style={{ fontFamily: 'monospace', fontSize: 12, resize: 'vertical' }} />
                                     </div>
-                                    <button className="btn btn-primary btn-sm" onClick={generatePaste}>⚡ Generate Variants</button>
+                                    <button className="btn btn-primary btn-sm" onClick={generatePaste}>⚡ توليد Variants</button>
                                 </div>
                             )}
 
                             {/* USD Pricing — user enters USD only, system converts */}
                             <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
                                 <div className="form-group" style={{ marginBottom: 0, flex: '0 0 140px' }}>
-                                    <label className="form-label">💵 Cost USD</label>
+                                    <label className="form-label">💵 التكلفة بالدولار</label>
                                     <input type="number" className="form-input" value={bulkCostUsd}
                                         onChange={e => setBulkCostUsd(e.target.value)}
                                         placeholder="$0.00" step="0.01" style={{ fontSize: 16, fontWeight: 600 }} />
                                 </div>
                                 <div className="form-group" style={{ marginBottom: 0, flex: '0 0 140px' }}>
-                                    <label className="form-label">💰 Sell USD</label>
+                                    <label className="form-label">💰 البيع بالدولار</label>
                                     <input type="number" className="form-input" value={bulkSellUsd}
                                         onChange={e => setBulkSellUsd(e.target.value)}
                                         placeholder="$0.00" step="0.01" style={{ fontSize: 16, fontWeight: 600 }} />
@@ -1182,22 +1182,22 @@ export default function ProductsPage() {
                                 <button className="btn btn-primary btn-sm" onClick={applyCostUsdToAll}
                                     disabled={!bulkCostUsd && !bulkSellUsd}
                                     style={{ height: 40, padding: '0 16px' }}>
-                                    ⚡ Apply to All Variants
+                                    ⚡ تطبيق على كل المتغيرات
                                 </button>
                             </div>
                             {/* Live conversion preview */}
                             {(bulkCostUsd || bulkSellUsd) && (
                                 <div style={{ marginTop: 8, padding: '10px 14px', background: 'var(--bg-secondary)', borderRadius: 8, fontSize: 13, display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', border: '1px solid var(--border)' }}>
-                                    <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>💱 Rate: {purchaseUsdRate || usdRate} LYD/USD</span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>💱 سعر الصرف: {purchaseUsdRate || usdRate} LYD/USD</span>
                                     {bulkCostUsd && (
-                                        <span>Cost: <strong>${bulkCostUsd}</strong> → <strong style={{ color: 'var(--text-secondary)' }}>{costLydFromUsd(bulkCostUsd)} LYD</strong></span>
+                                        <span>التكلفة: <strong>${bulkCostUsd}</strong> → <strong style={{ color: 'var(--text-secondary)' }}>{costLydFromUsd(bulkCostUsd)} LYD</strong></span>
                                     )}
                                     {bulkSellUsd && (
-                                        <span>Sale: <strong>${bulkSellUsd}</strong> → <strong style={{ color: 'var(--gold)' }}>{saleLydFromUsd(bulkSellUsd)} LYD</strong> <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>(↑5)</span></span>
+                                        <span>سعر البيع: <strong>${bulkSellUsd}</strong> → <strong style={{ color: 'var(--gold)' }}>{saleLydFromUsd(bulkSellUsd)} LYD</strong> <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>(↑5)</span></span>
                                     )}
                                     {bulkCostUsd && bulkSellUsd && Number(bulkSellUsd) > Number(bulkCostUsd) && (
                                         <span style={{ color: 'var(--green)', fontWeight: 600 }}>
-                                            Profit: +${(Number(bulkSellUsd) - Number(bulkCostUsd)).toFixed(2)} USD
+                                            الربح: +${(Number(bulkSellUsd) - Number(bulkCostUsd)).toFixed(2)} USD
                                         </span>
                                     )}
                                 </div>
@@ -1206,18 +1206,18 @@ export default function ProductsPage() {
                             {/* Purchase Data: Rate + Date */}
                             <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'flex-end', flexWrap: 'wrap', padding: '10px 0', borderTop: '1px solid var(--border)' }}>
                                 <div className="form-group" style={{ marginBottom: 0, flex: '0 0 140px' }}>
-                                    <label className="form-label">📅 Purchase Date</label>
+                                    <label className="form-label">📅 تاريخ الشراء</label>
                                     <input type="date" className="form-input" value={purchaseDate}
                                         onChange={e => setPurchaseDate(e.target.value)} />
                                 </div>
                                 <div className="form-group" style={{ marginBottom: 0, flex: '0 0 140px' }}>
-                                    <label className="form-label">💱 USD Rate at Purchase</label>
+                                    <label className="form-label">💱 سعر صرف الدولار للشراء</label>
                                     <input type="number" className="form-input" value={purchaseUsdRate}
                                         onChange={e => setPurchaseUsdRate(e.target.value)}
                                         placeholder={String(usdRate)} step="0.01" />
                                 </div>
                                 <div className="form-group" style={{ marginBottom: 0, flex: '0 0 200px' }}>
-                                    <label className="form-label">📍 Initial Stock Branch</label>
+                                    <label className="form-label">📍 الفرع للمخزون المبدئي</label>
                                     <select className="form-input" value={initialBranchId}
                                         onChange={e => setInitialBranchId(e.target.value)}>
                                         <option value="">{t('products.noInitialStock')}</option>
@@ -1225,7 +1225,7 @@ export default function ProductsPage() {
                                     </select>
                                 </div>
                                 <div style={{ fontSize: 11, color: 'var(--text-muted)', paddingBottom: 4 }}>
-                                    {initialBranchId ? '✅ Inventory rows (qty=0) will be created' : 'Product won\'t appear in inventory until stocked'}
+                                    {initialBranchId ? '✅ سيتم إنشاء صفوف في المخزون بقيمة 0' : 'Product won\'t appear in inventory until stocked'}
                                 </div>
                             </div>
                         </div>
@@ -1234,7 +1234,7 @@ export default function ProductsPage() {
                         {variants.length > 0 && (
                             <div style={{ marginTop: 20 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                                    <span style={{ fontWeight: 700 }}>📋 Generated Variants ({variants.length})</span>
+                                    <span style={{ fontWeight: 700 }}>📋 المتغيرات المولدة ({variants.length})</span>
                                     <div style={{ display: 'flex', gap: 8 }}>
                                         <button className="btn btn-secondary btn-sm" onClick={autoGenerateSkus} disabled={!newProduct.name}>
                                             {t('products.autoGenerateSkus')}
@@ -1312,10 +1312,10 @@ export default function ProductsPage() {
                         {/* Actions */}
                         <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
                             <button className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center' }}
-                                onClick={() => setShowCreate(false)}>Cancel</button>
+                                onClick={() => setShowCreate(false)}>إلغاء</button>
                             <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}
                                 onClick={handleCreate} disabled={creating || variants.length === 0}>
-                                {creating ? 'Creating...' : `✅ Create Product (${variants.length} variants)`}
+                                {creating ? 'Creating...' : `✅ إنشاء المنتج (${variants.length} variants)`}
                             </button>
                         </div>
                     </div>
@@ -1393,12 +1393,12 @@ export default function ProductsPage() {
                                             onChange={e => setEditForm({ ...editForm, nameAr: e.target.value })} dir="rtl" />
                                     </div>
                                     <div className="form-group">
-                                        <label className="form-label">Brand</label>
+                                        <label className="form-label">الماركة</label>
                                         <input className="form-input" value={editForm.brand}
                                             onChange={e => setEditForm({ ...editForm, brand: e.target.value })} />
                                     </div>
                                     <div className="form-group">
-                                        <label className="form-label">Category</label>
+                                        <label className="form-label">الفئة</label>
                                         <select className="form-input" value={editForm.categoryId}
                                             onChange={e => setEditForm({ ...editForm, categoryId: e.target.value })}>
                                             <option value="">{t('products.selectCategoryOption')}</option>
@@ -1474,7 +1474,7 @@ export default function ProductsPage() {
                                     } catch (err: any) { toast.error(err.message); }
                                 }}>🗑️ Delete</button>
                             <button className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center' }}
-                                onClick={() => setEditProduct(null)}>Cancel</button>
+                                onClick={() => setEditProduct(null)}>إلغاء</button>
                             <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}
                                 onClick={handleEditSave} disabled={saving}>
                                 {saving ? 'Saving...' : '✅ Save Changes'}
