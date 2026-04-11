@@ -1092,7 +1092,7 @@ export default function ProductsPage() {
                                     )}
                                     <button className="btn btn-primary btn-sm" onClick={generateFromPick}
                                         disabled={pickedSizes.size === 0}>
-                                        ⚡ توليد {pickedSizes.size * Math.max(1, parseSeparated(pickColors).length)} Variants
+                                        ⚡ توليد {pickedSizes.size * Math.max(1, parseSeparated(pickColors).length)} من المتغيرات
                                     </button>
                                 </div>
                             )}
@@ -1116,7 +1116,7 @@ export default function ProductsPage() {
                                                 placeholder="Black, White, Grey" />
                                         </div>
                                     </div>
-                                    <button className="btn btn-primary btn-sm" onClick={generateMatrix}>⚡ توليد Variants</button>
+                                    <button className="btn btn-primary btn-sm" onClick={generateMatrix}>⚡ توليد المتغيرات</button>
                                 </div>
                             )}
 
@@ -1147,7 +1147,7 @@ export default function ProductsPage() {
                                                 onChange={e => setRangeColors(e.target.value)} placeholder="Black, White" />
                                         </div>
                                     </div>
-                                    <button className="btn btn-primary btn-sm" onClick={generateRange}>⚡ توليد Variants</button>
+                                    <button className="btn btn-primary btn-sm" onClick={generateRange}>⚡ توليد المتغيرات</button>
                                 </div>
                             )}
 
@@ -1161,7 +1161,7 @@ export default function ProductsPage() {
                                             onChange={e => setPasteText(e.target.value)}
                                             placeholder={"42, Black\n43, Black\n42, White\n43, White\nXL\n2XL"} style={{ fontFamily: 'monospace', fontSize: 12, resize: 'vertical' }} />
                                     </div>
-                                    <button className="btn btn-primary btn-sm" onClick={generatePaste}>⚡ توليد Variants</button>
+                                    <button className="btn btn-primary btn-sm" onClick={generatePaste}>⚡ توليد المتغيرات</button>
                                 </div>
                             )}
 
@@ -1225,7 +1225,7 @@ export default function ProductsPage() {
                                     </select>
                                 </div>
                                 <div style={{ fontSize: 11, color: 'var(--text-muted)', paddingBottom: 4 }}>
-                                    {initialBranchId ? '✅ سيتم إنشاء صفوف في المخزون بقيمة 0' : 'Product won\'t appear in inventory until stocked'}
+                                    {initialBranchId ? '✅ سيتم إنشاء صفوف في المخزون بقيمة 0' : 'لن يظهر المنتج في المخزون في حال لم تختر الفرع'}
                                 </div>
                             </div>
                         </div>
@@ -1315,7 +1315,7 @@ export default function ProductsPage() {
                                 onClick={() => setShowCreate(false)}>إلغاء</button>
                             <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}
                                 onClick={handleCreate} disabled={creating || variants.length === 0}>
-                                {creating ? 'Creating...' : `✅ إنشاء المنتج (${variants.length} variants)`}
+                                {creating ? 'جاري الإنشاء...' : `✅ إنشاء المنتج (${variants.length} من المتغيرات)`}
                             </button>
                         </div>
                     </div>
