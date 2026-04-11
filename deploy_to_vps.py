@@ -1,4 +1,4 @@
-"""OMCS VPS - Rebuild backend only"""
+"""OMCS VPS - Rebuild storefront with Arabic update"""
 import paramiko
 import time
 
@@ -29,15 +29,25 @@ def main():
     print("[OK] Connected!")
 
     run_cmd(ssh, "cd /opt/omcs && git pull origin main")
-    run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml up -d --build omcs-backend", timeout=600)
     
-    print("\n  Waiting 15s for backend to start...")
+    # Clean build cache for fresh storefront
+    run_cmd(ssh, "docker builder prune -af", timeout=60)
+    
+    print("\n=== Rebuilding storefront (Arabic update)... ===")
+    run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml up -d --build omcs-storefront", timeout=600)
+    
+    print("\n  Waiting 15s...")
     time.sleep(15)
     
-    run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml ps")
-    run_cmd(ssh, "curl -s -o /dev/null -w 'API: %{http_code}' http://localhost:4000/api/docs; echo")
+    # Restart nginx
+    run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml restart omcs-nginx", timeout=60)
+    time.sleep(5)
     
-    print("\n  Backend rebuilt with product-level alerts!")
+    run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml ps")
+    run_cmd(ssh, "curl -s -o /dev/null -w 'Shop: %{http_code}' http://shop.omcs.com.ly; echo")
+    
+    print("\n  Storefront rebuilt with full Arabic UI!")
+    print("  Visit: http://shop.omcs.com.ly")
     ssh.close()
 
 if __name__ == "__main__":

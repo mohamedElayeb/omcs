@@ -35,7 +35,7 @@ const HERO_SLIDES = [
     bg: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)',
     badge: '✦ موسم جديد',
     title: 'تشكيلة أزياء فاخرة',
-    subtitle: 'اكتشف ماركات أصلية بأسعار لا تُقاوم. توصيل مجاني في جميع أنحاء ليبيا.',
+    subtitle: 'اكتشف ماركات أصلية بأسعار لا تُقاوم. تسوق الآن وتواصل معنا عبر الواتساب.',
   },
   {
     bg: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #0a0a0a 100%)',
@@ -45,9 +45,9 @@ const HERO_SLIDES = [
   },
   {
     bg: 'linear-gradient(135deg, #16213e 0%, #0f3460 50%, #1a1a2e 100%)',
-    badge: '⚡ عرض خاص',
-    title: 'خصومات تصل إلى 50%',
-    subtitle: 'لا تفوّت أكبر تخفيضاتنا لهذا الموسم. لفترة محدودة فقط.',
+    badge: '⚡ وصل حديثاً',
+    title: 'أحدث الماركات العالمية',
+    subtitle: 'تصفح أحدث المنتجات المتوفرة لدينا.',
   },
 ];
 
@@ -402,27 +402,7 @@ export default function StorefrontPage() {
             </div>
           </section>
 
-          {/* ─── SCROLLING MARQUEE ─── */}
-          <div className="marquee-strip">
-            <div className="marquee-track">
-              {[...Array(2)].map((_, idx) => (
-                <span key={idx} style={{ display: 'contents' }}>
-                  <span>🚚 توصيل مجاني في جميع أنحاء ليبيا</span><span className="dot" />
-                  <span>🔒 دفع آمن</span><span className="dot" />
-                  <span>✦ ماركات أصلية 100%</span><span className="dot" />
-                  <span>↩️ إرجاع سهل</span><span className="dot" />
-                  <span>⚡ وصول جديد أسبوعياً</span><span className="dot" />
-                  <span>🏆 جودة عالية</span><span className="dot" />
-                  <span>🚚 توصيل مجاني في جميع أنحاء ليبيا</span><span className="dot" />
-                  <span>🔒 دفع آمن</span><span className="dot" />
-                  <span>✦ ماركات أصلية 100%</span><span className="dot" />
-                  <span>↩️ إرجاع سهل</span><span className="dot" />
-                  <span>⚡ وصول جديد أسبوعياً</span><span className="dot" />
-                  <span>🏆 جودة عالية</span><span className="dot" />
-                </span>
-              ))}
-            </div>
-          </div>
+
 
           {/* ─── BEST SELLERS ─── */}
           {!loading && bestSellers.length > 0 && !search && !selectedCategory && !selectedBrand && (
