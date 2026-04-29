@@ -743,7 +743,11 @@
         "scanning": "جاري المسح",
         "scannedAdded": "تمت الإضافة عبر الماسح",
         "barcodeNotFound": "لم يتم العثور على الباركود",
-        "scannerReady": "📡 ماسح الباركود جاهز - قم بمسح أي باركود"
+        "scannerReady": "📡 ماسح الباركود جاهز - قم بمسح أي باركود",
+        "splitPayment": "دفع مقسم",
+        "splitPaymentTitle": "دفع مقسم (طريقتين)",
+        "splitPaymentHint": "اختر الطريقة الثانية وأدخل المبلغ",
+        "splitAmount": "المبلغ"
     },
     "pageTitles": {
         "dashboard": "لوحة التحكم",

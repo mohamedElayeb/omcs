@@ -743,7 +743,11 @@
         "scanning": "Scanning",
         "scannedAdded": "Added via scanner",
         "barcodeNotFound": "Barcode not found",
-        "scannerReady": "📡 Barcode scanner ready — scan any barcode"
+        "scannerReady": "📡 Barcode scanner ready — scan any barcode",
+        "splitPayment": "Split Pay",
+        "splitPaymentTitle": "Split Payment (2 Methods)",
+        "splitPaymentHint": "Pick the second method and enter the amount",
+        "splitAmount": "Amount"
     },
     "pageTitles": {
         "dashboard": "Dashboard",

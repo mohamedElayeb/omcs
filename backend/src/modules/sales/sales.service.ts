@@ -28,6 +28,9 @@ interface CreateSaleDto {
     deliveryCity?: string;
     deliveryCompany?: string;
     deliveryFee?: number;
+    // Split payment
+    splitPaymentMethod?: string;
+    splitPaymentAmount?: number;
 }
 
 @Injectable()
@@ -235,6 +238,9 @@ export class SalesService {
                 deliveryCity: dto.deliveryCity || null as any,
                 deliveryCompany: dto.deliveryCompany as any || null as any,
                 deliveryFee: dto.deliveryFee || null as any,
+                // Split payment
+                splitPaymentMethod: dto.splitPaymentMethod ? (dto.splitPaymentMethod as PaymentMethod) : null as any,
+                splitPaymentAmount: dto.splitPaymentAmount || null as any,
             });
             const savedSale = await em.save(Sale, sale);
 

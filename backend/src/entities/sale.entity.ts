@@ -54,6 +54,13 @@ export class Sale {
     @Column({ name: 'payment_method', type: 'enum', enum: PaymentMethod, default: PaymentMethod.CASH })
     paymentMethod: PaymentMethod;
 
+    // ─── Split Payment (secondary method) ───
+    @Column({ name: 'split_payment_method', type: 'enum', enum: PaymentMethod, nullable: true })
+    splitPaymentMethod: PaymentMethod;
+
+    @Column({ name: 'split_payment_amount', type: 'decimal', precision: 12, scale: 3, nullable: true })
+    splitPaymentAmount: number;
+
     @Column({ type: 'enum', enum: SaleStatus, default: SaleStatus.COMPLETED })
     status: SaleStatus;
 

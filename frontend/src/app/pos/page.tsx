@@ -62,6 +62,10 @@ export default function POSPage() {
     const [deliveryCity, setDeliveryCity] = useState('');
     const [deliveryCompany, setDeliveryCompany] = useState('');
     const [deliveryFee, setDeliveryFee] = useState(0);
+    // Split payment
+    const [splitPayment, setSplitPayment] = useState(false);
+    const [splitMethod, setSplitMethod] = useState('CARD');
+    const [splitAmount, setSplitAmount] = useState(0);
     // New: category filter & variant picker
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -284,6 +288,11 @@ export default function POSPage() {
             payload.deliveryCompany = deliveryCompany || undefined;
             payload.deliveryFee = deliveryFee || undefined;
         }
+        // Split payment
+        if (splitPayment && splitAmount > 0 && splitMethod !== paymentMethod) {
+            payload.splitPaymentMethod = splitMethod;
+            payload.splitPaymentAmount = splitAmount;
+        }
 
         setLoading(true);
         try {
@@ -298,6 +307,7 @@ export default function POSPage() {
             setPaymentMethod('CASH'); setSaleNotes('');
             setTransferRef(''); setTransferBank('');
             setCustomerName(''); setCustomerPhone(''); setDeliveryAddress(''); setDeliveryCity(''); setDeliveryCompany(''); setDeliveryFee(0);
+            setSplitPayment(false); setSplitMethod('CARD'); setSplitAmount(0);
         } catch (err: any) { toast.error(t('common.error') + ': ' + err.message); }
         finally { setLoading(false); }
     };
@@ -727,7 +737,22 @@ export default function POSPage() {
                     )}
                     {/* Payment Method */}
                     <div style={{ marginBottom: 10 }}>
-                        <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{t('pos.paymentMethod')}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('pos.paymentMethod')}</span>
+                            <button
+                                type="button"
+                                onClick={() => { setSplitPayment(!splitPayment); setSplitAmount(0); }}
+                                style={{
+                                    fontSize: 10, padding: '2px 8px', borderRadius: 4, cursor: 'pointer',
+                                    background: splitPayment ? 'var(--gold)' : 'var(--bg-tertiary)',
+                                    color: splitPayment ? '#000' : 'var(--text-muted)',
+                                    border: `1px solid ${splitPayment ? 'var(--gold)' : 'var(--border)'}`,
+                                    fontWeight: splitPayment ? 700 : 400,
+                                }}
+                            >
+                                ✂️ {t('pos.splitPayment')}
+                            </button>
+                        </div>
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                             {[{ k: 'CASH', icon: '💵', label: t('pos.cashLabel') }, { k: 'CARD', icon: '💳', label: t('pos.cardLabel') }, { k: 'BANK_TRANSFER', icon: '🏦', label: t('pos.bankLabel') }, { k: 'DELIVERY', icon: '🚚', label: t('pos.deliveryLabel') }].map(m => (
                                 <button key={m.k}
@@ -739,6 +764,59 @@ export default function POSPage() {
                             ))}
                         </div>
                     </div>
+                    {/* Split Payment UI */}
+                    {splitPayment && (
+                        <div style={{
+                            marginBottom: 10, padding: 10, borderRadius: 8,
+                            background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.25)',
+                        }}>
+                            <div style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600, marginBottom: 6 }}>
+                                ✂️ {t('pos.splitPaymentTitle')}
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
+                                {t('pos.splitPaymentHint')}
+                            </div>
+                            <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                                {[{ k: 'CASH', icon: '💵', label: t('pos.cashLabel') }, { k: 'CARD', icon: '💳', label: t('pos.cardLabel') }, { k: 'BANK_TRANSFER', icon: '🏦', label: t('pos.bankLabel') }]
+                                    .filter(m => m.k !== paymentMethod)
+                                    .map(m => (
+                                        <button key={m.k}
+                                            className={`btn btn-sm ${splitMethod === m.k ? 'btn-primary' : 'btn-secondary'}`}
+                                            style={{ flex: 1, fontSize: 11 }}
+                                            onClick={() => setSplitMethod(m.k)}>
+                                            {m.icon} {m.label}
+                                        </button>
+                                    ))}
+                            </div>
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                <span style={{ fontSize: 12, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                                    {t('pos.splitAmount')}:
+                                </span>
+                                <input type="number" min={0} max={total} step={1}
+                                    value={splitAmount || ''}
+                                    onChange={e => setSplitAmount(Math.min(Number(e.target.value) || 0, total))}
+                                    style={{
+                                        flex: 1, padding: '6px 10px', fontSize: 14, fontWeight: 700,
+                                        background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+                                        borderRadius: 6, color: 'var(--text-primary)', textAlign: 'end',
+                                    }}
+                                />
+                                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.lyd')}</span>
+                            </div>
+                            {splitAmount > 0 && (
+                                <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span>{paymentMethod === 'CASH' ? '💵' : paymentMethod === 'CARD' ? '💳' : '🏦'} {t(`pos.${paymentMethod === 'CASH' ? 'cashLabel' : paymentMethod === 'CARD' ? 'cardLabel' : 'bankLabel'}`)}</span>
+                                        <span style={{ fontWeight: 600 }}>{fmt(total - splitAmount)} {t('common.lyd')}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span>{splitMethod === 'CASH' ? '💵' : splitMethod === 'CARD' ? '💳' : '🏦'} {t(`pos.${splitMethod === 'CASH' ? 'cashLabel' : splitMethod === 'CARD' ? 'cardLabel' : 'bankLabel'}`)}</span>
+                                        <span style={{ fontWeight: 600 }}>{fmt(splitAmount)} {t('common.lyd')}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                     {/* Bank Transfer Fields */}
                     {paymentMethod === 'BANK_TRANSFER' && (
                         <div style={{ marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
