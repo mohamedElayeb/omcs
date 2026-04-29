@@ -217,7 +217,7 @@ export class ReturnsService {
                 details: { type: returnType, restockPolicy, refundAmount, items: dto.items.length },
                 userId: processor.id,
                 branchId: dto.branchId,
-            }).catch(() => {});
+            }).catch(e => console.error('Activity log failed:', e.message));
 
             return result;
         });

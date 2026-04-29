@@ -32,13 +32,7 @@ def main():
     run_cmd(ssh, "cd /opt/omcs && git fetch origin main && git reset --hard origin/main")
     run_cmd(ssh, "cd /opt/omcs && git log --oneline -3")
 
-    # 2. Fix DB: add missing columns to activity_logs table
-    DB = "omcs_user"
-    fix_sql = (
-        "ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS ip_address VARCHAR(50); "
-        "ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS entity_type VARCHAR(50); "
-    )
-    run_cmd(ssh, f'docker exec omcs-db psql -U {DB} -d omcs -c "{fix_sql}"')
+    # 2. No DB fixes needed — activity_logs table already has correct camelCase columns
 
     # 3. Rebuild both frontend + backend
     print("\n=== Rebuilding ===")

@@ -300,7 +300,7 @@ export class SalesService {
                 details: { invoiceNumber: result?.invoiceNumber, total: result?.total, items: dto.items.length, paymentMethod },
                 userId: cashier.id,
                 branchId: dto.branchId,
-            }).catch(() => {});
+            }).catch(e => console.error('Activity log failed:', e.message));
 
             return result;
         });
@@ -413,7 +413,7 @@ export class SalesService {
                 details: { invoiceNumber: sale.invoiceNumber, total: sale.total, reason },
                 userId: user.id,
                 branchId: sale.branchId,
-            }).catch(() => {});
+            }).catch(e => console.error('Activity log failed:', e.message));
 
             return sale;
         });
@@ -457,7 +457,7 @@ export class SalesService {
             description: `تحديث حالة التحويل البنكي: ${oldStatus} → ${newStatus}`,
             details: { oldStatus, newStatus, note },
             userId,
-        }).catch(() => {});
+        }).catch(e => console.error('Activity log failed:', e.message));
 
         return sale;
     }
@@ -508,7 +508,7 @@ export class SalesService {
             description: `تحديث حالة التوصيل: ${oldStatus} → ${newStatus}`,
             details: { oldStatus, newStatus, note },
             userId,
-        }).catch(() => {});
+        }).catch(e => console.error('Activity log failed:', e.message));
 
         return sale;
     }

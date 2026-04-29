@@ -295,7 +295,7 @@ export class InventoryService {
                 details: { variantId, sku: variant?.sku, quantity, totalAfter: totalQty },
                 userId,
                 branchId,
-            }).catch(() => {});
+            }).catch(e => console.error('Activity log failed:', e.message));
 
             return inv;
         });

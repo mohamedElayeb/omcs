@@ -111,7 +111,7 @@ export class ProductsService {
             entityId: saved.id,
             description: `إنشاء منتج: ${data.name} — ${data.variants?.length || 0} متغير`,
             details: { name: data.name, brand: data.brand, variants: data.variants?.length },
-        }).catch(() => {});
+        }).catch(e => console.error('Activity log failed:', e.message));
         return result;
     }
 
@@ -126,7 +126,7 @@ export class ProductsService {
             entityId: id,
             description: `تعديل منتج: ${result.name}`,
             details: { changes: data },
-        }).catch(() => {});
+        }).catch(e => console.error('Activity log failed:', e.message));
         return result;
     }
 
@@ -184,6 +184,23 @@ export class ProductsService {
         const result = await this.variantRepo.findOne({ where: { id: variantId }, relations: ['product'] });
         if (result?.product?.id) {
             this.events.emitProductChanged({ productId: result.product.id, action: 'updated' });
+        }
+        // Activity log for price/variant update
+        if (priceChanged) {
+            this.activityLog.log({
+                action: 'PRICE_UPDATE',
+                entityType: 'variant',
+                entityId: variantId,
+                description: `تحديث سعر ${result?.product?.name || ''} (${variant.size || variant.color || 'default'}): ${variant.salePrice} → ${data.salePrice || variant.salePrice}`,
+                details: {
+                    productName: result?.product?.name,
+                    sku: variant.sku,
+                    oldSalePrice: variant.salePrice,
+                    newSalePrice: data.salePrice || variant.salePrice,
+                    reason,
+                },
+                userId: changedBy,
+            }).catch(e => console.error('Activity log failed:', e.message));
         }
         return result;
     }

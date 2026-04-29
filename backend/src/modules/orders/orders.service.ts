@@ -373,7 +373,7 @@ export class OrdersService {
             entityId: orderId,
             description: `تحديث طلب ${order.orderNumber}: ${oldStatus} → ${status}`,
             details: { orderNumber: order.orderNumber, oldStatus, newStatus: status, adminNotes },
-        }).catch(() => {});
+        }).catch(e => console.error('Activity log failed:', e.message));
 
         return order;
     }
@@ -407,7 +407,7 @@ export class OrdersService {
             entityId: orderId,
             description: `تأكيد دفع طلب ${order.orderNumber} — ${order.total} د.ل`,
             details: { orderNumber: order.orderNumber, total: order.total, note },
-        }).catch(() => {});
+        }).catch(e => console.error('Activity log failed:', e.message));
 
         return order;
     }
@@ -428,7 +428,7 @@ export class OrdersService {
             entityId: orderId,
             description: `رفض دفع طلب ${order.orderNumber} — ${order.total} د.ل`,
             details: { orderNumber: order.orderNumber, total: order.total, note },
-        }).catch(() => {});
+        }).catch(e => console.error('Activity log failed:', e.message));
 
         return order;
     }
