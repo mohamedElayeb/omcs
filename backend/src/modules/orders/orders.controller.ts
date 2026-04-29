@@ -6,6 +6,7 @@ import { OrdersService } from './orders.service';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { UserRole, OrderStatus } from '../../common/enums';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('api/orders')
 export class OrdersController {
@@ -70,22 +71,22 @@ export class OrdersController {
     @Patch('admin/:id/status')
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(UserRole.OWNER, UserRole.MANAGER)
-    updateStatus(@Param('id') id: string, @Body() data: { status: OrderStatus; notes?: string }) {
-        return this.service.updateStatus(id, data.status, data.notes);
+    updateStatus(@Param('id') id: string, @Body() data: { status: OrderStatus; notes?: string }, @CurrentUser() user: any) {
+        return this.service.updateStatus(id, data.status, data.notes, user?.id);
     }
 
     @Patch('admin/:id/payment/confirm')
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(UserRole.OWNER, UserRole.MANAGER)
-    confirmPayment(@Param('id') id: string, @Body() data: { note?: string }) {
-        return this.service.confirmPayment(id, data.note);
+    confirmPayment(@Param('id') id: string, @Body() data: { note?: string }, @CurrentUser() user: any) {
+        return this.service.confirmPayment(id, data.note, user?.id);
     }
 
     @Patch('admin/:id/payment/reject')
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(UserRole.OWNER, UserRole.MANAGER)
-    rejectPayment(@Param('id') id: string, @Body() data: { note?: string }) {
-        return this.service.rejectPayment(id, data.note);
+    rejectPayment(@Param('id') id: string, @Body() data: { note?: string }, @CurrentUser() user: any) {
+        return this.service.rejectPayment(id, data.note, user?.id);
     }
 
     @Patch('admin/:id/delivery')

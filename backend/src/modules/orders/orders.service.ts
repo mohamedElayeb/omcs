@@ -326,7 +326,7 @@ export class OrdersService {
     /**
      * ADMIN: Update order status (workflow progression).
      */
-    async updateStatus(orderId: string, status: OrderStatus, adminNotes?: string) {
+    async updateStatus(orderId: string, status: OrderStatus, adminNotes?: string, userId?: string) {
         const order = await this.orderRepo.findOne({
             where: { id: orderId },
             relations: ['items'],
@@ -373,6 +373,7 @@ export class OrdersService {
             entityId: orderId,
             description: `تحديث طلب ${order.orderNumber}: ${oldStatus} → ${status}`,
             details: { orderNumber: order.orderNumber, oldStatus, newStatus: status, adminNotes },
+            userId,
         }).catch(e => console.error('Activity log failed:', e.message));
 
         return order;
@@ -382,7 +383,7 @@ export class OrdersService {
      * ADMIN: Confirm bank transfer payment.
      * This also transitions the order to CONFIRMED and performs FIFO stock deduction.
      */
-    async confirmPayment(orderId: string, note?: string) {
+    async confirmPayment(orderId: string, note?: string, userId?: string) {
         const order = await this.orderRepo.findOne({ where: { id: orderId }, relations: ['items'] });
         if (!order) throw new NotFoundException('Order not found');
         order.paymentStatus = OrderPaymentStatus.CONFIRMED;
@@ -407,6 +408,7 @@ export class OrdersService {
             entityId: orderId,
             description: `تأكيد دفع طلب ${order.orderNumber} — ${order.total} د.ل`,
             details: { orderNumber: order.orderNumber, total: order.total, note },
+            userId,
         }).catch(e => console.error('Activity log failed:', e.message));
 
         return order;
@@ -415,7 +417,7 @@ export class OrdersService {
     /**
      * ADMIN: Reject bank transfer payment.
      */
-    async rejectPayment(orderId: string, note?: string) {
+    async rejectPayment(orderId: string, note?: string, userId?: string) {
         const order = await this.orderRepo.findOne({ where: { id: orderId } });
         if (!order) throw new NotFoundException('Order not found');
         order.paymentStatus = OrderPaymentStatus.REJECTED;
@@ -428,6 +430,7 @@ export class OrdersService {
             entityId: orderId,
             description: `رفض دفع طلب ${order.orderNumber} — ${order.total} د.ل`,
             details: { orderNumber: order.orderNumber, total: order.total, note },
+            userId,
         }).catch(e => console.error('Activity log failed:', e.message));
 
         return order;

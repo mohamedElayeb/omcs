@@ -167,7 +167,7 @@ export default function ActivityLogPage() {
                                             </td>
                                             <td style={{ fontSize: 13 }}>{log.description}</td>
                                             <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                                                {log.user?.name || log.userId?.slice(0, 8) || '—'}
+                                                {log.user?.fullName || log.user?.email || '—'}
                                             </td>
                                             <td style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                                                 {formatDate(log.createdAt)}
