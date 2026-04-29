@@ -687,7 +687,7 @@
     },
     "pos": {
         "title": "Point of Sale",
-        "searchPlaceholder": "Search product, SKU, size, or brand...",
+        "searchPlaceholder": "Search product, SKU, barcode, size... (Enter to add)",
         "selectBranchMsg": "Please select a branch from the header to use POS",
         "noProductsMatch": "No products match search",
         "noProductsAvailable": "No products available",

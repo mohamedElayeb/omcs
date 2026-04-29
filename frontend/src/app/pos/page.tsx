@@ -332,9 +332,15 @@ export default function POSPage() {
             if (p.name.toLowerCase().includes(q)) return true;
             if ((p.nameAr || '').toLowerCase().includes(q)) return true;
             if ((p.brand || '').toLowerCase().includes(q)) return true;
-            if ((p.variants || []).some((v: any) =>
-                v.sku.toLowerCase().includes(q) || (v.size || '').toLowerCase().includes(q) || (v.color || '').toLowerCase().includes(q)
-            )) return true;
+            if ((p.variants || []).some((v: any) => {
+                if (v.sku.toLowerCase().includes(q)) return true;
+                if ((v.size || '').toLowerCase().includes(q)) return true;
+                if ((v.color || '').toLowerCase().includes(q)) return true;
+                // Also match against barcode-encoded value
+                const barcodeVal = sanitizeForBarcode(v.sku || '').toLowerCase();
+                if (barcodeVal.includes(q)) return true;
+                return false;
+            })) return true;
             return false;
         });
 
@@ -412,6 +418,14 @@ export default function POSPage() {
                             placeholder={t('pos.searchPlaceholder')}
                             value={search}
                             onChange={e => setSearch(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter' && search.trim().length >= 3) {
+                                    e.preventDefault();
+                                    // Try exact barcode/SKU match and add to cart
+                                    processScan(search.trim());
+                                    setSearch('');
+                                }
+                            }}
                             autoFocus
                             autoComplete="off"
                             spellCheck={false}

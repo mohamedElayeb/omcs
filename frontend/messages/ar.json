@@ -687,7 +687,7 @@
     },
     "pos": {
         "title": "نقطة البيع",
-        "searchPlaceholder": "بحث منتج، SKU، مقاس، أو علامة...",
+        "searchPlaceholder": "بحث منتج، SKU، باركود، مقاس، أو علامة... (Enter للإضافة)",
         "selectBranchMsg": "يرجى اختيار فرع من الأعلى لاستخدام نقطة البيع",
         "noProductsMatch": "لا توجد منتجات مطابقة للبحث",
         "noProductsAvailable": "لا توجد منتجات متاحة",
