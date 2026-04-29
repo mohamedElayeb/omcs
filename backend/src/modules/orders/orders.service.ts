@@ -10,6 +10,7 @@ import {
 import { StockMovementAction } from '../../common/enums';
 import { OrderStatus, OrderPaymentMethod, OrderPaymentStatus } from '../../common/enums';
 import { EventsGateway } from '../events/events.gateway';
+import { ActivityLogService } from '../activity-log/activity-log.service';
 
 // ─── DTO ───
 interface CreateOrderDto {
@@ -38,6 +39,7 @@ export class OrdersService {
         @InjectRepository(StockLedger) private ledgerRepo: Repository<StockLedger>,
         private dataSource: DataSource,
         private events: EventsGateway,
+        private activityLog: ActivityLogService,
     ) { }
 
     /**
@@ -365,6 +367,14 @@ export class OrdersService {
             oldStatus, newStatus: status,
         });
 
+        this.activityLog.log({
+            action: status === OrderStatus.CANCELLED ? 'ORDER_CANCEL' : 'ORDER_STATUS',
+            entityType: 'order',
+            entityId: orderId,
+            description: `تحديث طلب ${order.orderNumber}: ${oldStatus} → ${status}`,
+            details: { orderNumber: order.orderNumber, oldStatus, newStatus: status, adminNotes },
+        }).catch(() => {});
+
         return order;
     }
 
@@ -391,6 +401,14 @@ export class OrdersService {
             oldStatus: OrderStatus.PENDING, newStatus: OrderStatus.CONFIRMED,
         });
 
+        this.activityLog.log({
+            action: 'ORDER_PAYMENT_CONFIRM',
+            entityType: 'order',
+            entityId: orderId,
+            description: `تأكيد دفع طلب ${order.orderNumber} — ${order.total} د.ل`,
+            details: { orderNumber: order.orderNumber, total: order.total, note },
+        }).catch(() => {});
+
         return order;
     }
 
@@ -403,6 +421,15 @@ export class OrdersService {
         order.paymentStatus = OrderPaymentStatus.REJECTED;
         if (note) order.paymentNote = note;
         await this.orderRepo.save(order);
+
+        this.activityLog.log({
+            action: 'ORDER_PAYMENT_REJECT',
+            entityType: 'order',
+            entityId: orderId,
+            description: `رفض دفع طلب ${order.orderNumber} — ${order.total} د.ل`,
+            details: { orderNumber: order.orderNumber, total: order.total, note },
+        }).catch(() => {});
+
         return order;
     }
 

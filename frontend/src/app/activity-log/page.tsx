@@ -6,22 +6,25 @@ import { activityLogApi } from '../../lib/api';
 const ACTION_ICONS: Record<string, string> = {
     SALE: '💰', VOID: '🚫', RESTOCK: '📦', TRANSFER: '🚚',
     PRODUCT_CREATE: '➕', PRODUCT_EDIT: '✏️', PRODUCT_DELETE: '🗑️',
-    PRICE_UPDATE: '💲', RETURN: '↩️', DELIVERY_STATUS: '🚚',
+    PRICE_UPDATE: '💲', RETURN: '↩️', EXCHANGE: '🔄', DELIVERY_STATUS: '🚚',
     BANK_STATUS: '🏦', LOGIN: '🔑',
+    ORDER_STATUS: '📦', ORDER_CANCEL: '❌', ORDER_PAYMENT_CONFIRM: '✅', ORDER_PAYMENT_REJECT: '❌',
 };
 
 const ACTION_LABELS: Record<string, string> = {
     SALE: 'بيع', VOID: 'إلغاء', RESTOCK: 'تعبئة', TRANSFER: 'تحويل',
     PRODUCT_CREATE: 'إنشاء منتج', PRODUCT_EDIT: 'تعديل منتج', PRODUCT_DELETE: 'حذف منتج',
-    PRICE_UPDATE: 'تحديث سعر', RETURN: 'مرتجع', DELIVERY_STATUS: 'حالة توصيل',
+    PRICE_UPDATE: 'تحديث سعر', RETURN: 'مرتجع', EXCHANGE: 'استبدال', DELIVERY_STATUS: 'حالة توصيل',
     BANK_STATUS: 'حالة تحويل بنكي', LOGIN: 'تسجيل دخول',
+    ORDER_STATUS: 'تحديث طلب', ORDER_CANCEL: 'إلغاء طلب', ORDER_PAYMENT_CONFIRM: 'تأكيد دفع', ORDER_PAYMENT_REJECT: 'رفض دفع',
 };
 
 const ACTION_COLORS: Record<string, string> = {
     SALE: '#22c55e', VOID: '#ef4444', RESTOCK: '#3b82f6', TRANSFER: '#8b5cf6',
     PRODUCT_CREATE: '#22c55e', PRODUCT_EDIT: '#f59e0b', PRODUCT_DELETE: '#ef4444',
-    PRICE_UPDATE: '#f59e0b', RETURN: '#f97316', DELIVERY_STATUS: '#6366f1',
+    PRICE_UPDATE: '#f59e0b', RETURN: '#f97316', EXCHANGE: '#a855f7', DELIVERY_STATUS: '#6366f1',
     BANK_STATUS: '#0ea5e9', LOGIN: '#64748b',
+    ORDER_STATUS: '#3b82f6', ORDER_CANCEL: '#ef4444', ORDER_PAYMENT_CONFIRM: '#22c55e', ORDER_PAYMENT_REJECT: '#ef4444',
 };
 
 export default function ActivityLogPage() {

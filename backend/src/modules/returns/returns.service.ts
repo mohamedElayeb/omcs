@@ -5,6 +5,7 @@ import { Return, ReturnItem, Sale, SaleItem, Order, OrderItem, Inventory, StockM
 import { StockMovementAction, ReturnType, ReturnStatus, RestockPolicy } from '../../common/enums';
 import { User } from '../../entities';
 import { EventsGateway } from '../events/events.gateway';
+import { ActivityLogService } from '../activity-log/activity-log.service';
 
 interface CreateReturnDto {
     // POS return: provide originalSaleId
@@ -29,6 +30,7 @@ export class ReturnsService {
         @InjectRepository(StockLedger) private ledgerRepo: Repository<StockLedger>,
         private dataSource: DataSource,
         private events: EventsGateway,
+        private activityLog: ActivityLogService,
     ) { }
 
     // ═══════════════════════════════════════
@@ -206,6 +208,16 @@ export class ReturnsService {
             if (result) {
                 this.events.emitReturnCompleted(result);
             }
+
+            this.activityLog.log({
+                action: returnType === ReturnType.EXCHANGE ? 'EXCHANGE' : 'RETURN',
+                entityType: 'return',
+                entityId: saved.id,
+                description: `${returnType === ReturnType.EXCHANGE ? 'استبدال' : 'مرتجع'} — ${dto.items.length} عنصر — ${refundAmount} د.ل`,
+                details: { type: returnType, restockPolicy, refundAmount, items: dto.items.length },
+                userId: processor.id,
+                branchId: dto.branchId,
+            }).catch(() => {});
 
             return result;
         });
