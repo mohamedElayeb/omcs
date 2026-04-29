@@ -178,6 +178,7 @@ export class ProductsService {
         delete (data as any).purchaseUsdRate;
         delete (data as any).costLydAtPurchase;
         delete (data as any).purchaseDate;
+        delete (data as any).reason; // reason is for price history, not a variant column
 
         await this.variantRepo.update(variantId, data);
         const result = await this.variantRepo.findOne({ where: { id: variantId }, relations: ['product'] });

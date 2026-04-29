@@ -1,4 +1,4 @@
-"""OMCS VPS - Full redeploy with git pull"""
+"""OMCS VPS - Full deploy with DB fix for activity_logs"""
 import paramiko
 import time
 
@@ -7,7 +7,7 @@ USER = "root"
 PASS = "Omcs@2025Secure!"
 
 def run_cmd(ssh, cmd, timeout=300):
-    print(f"\n>> {cmd[:120]}")
+    print(f"\n>> {cmd[:160]}")
     stdin, stdout, stderr = ssh.exec_command(cmd, timeout=timeout)
     out = stdout.read().decode('utf-8', errors='replace')
     err = stderr.read().decode('utf-8', errors='replace')
@@ -28,17 +28,20 @@ def main():
     ssh.connect(HOST, username=USER, password=PASS, timeout=30)
     print("[OK] Connected!")
 
-    # Force pull latest code
-    print("\n=== Pulling latest code ===")
-    run_cmd(ssh, "cd /opt/omcs && git fetch origin main && git reset --hard origin/main", timeout=60)
+    # 1. Force pull latest
+    run_cmd(ssh, "cd /opt/omcs && git fetch origin main && git reset --hard origin/main")
     run_cmd(ssh, "cd /opt/omcs && git log --oneline -3")
-    
-    # Verify split payment code exists
-    code, out, _ = run_cmd(ssh, "cd /opt/omcs && grep -c splitPayment frontend/src/app/pos/page.tsx")
-    print(f"\n  splitPayment occurrences: {out.strip()}")
 
-    # Rebuild
-    print("\n=== Rebuilding frontend + backend ===")
+    # 2. Fix DB: add missing columns to activity_logs table
+    DB = "omcs_user"
+    fix_sql = (
+        "ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS ip_address VARCHAR(50); "
+        "ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS entity_type VARCHAR(50); "
+    )
+    run_cmd(ssh, f'docker exec omcs-db psql -U {DB} -d omcs -c "{fix_sql}"')
+
+    # 3. Rebuild both frontend + backend
+    print("\n=== Rebuilding ===")
     run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml up -d --build omcs-frontend omcs-backend", timeout=600)
     
     print("\n  Waiting 15s...")
@@ -47,10 +50,15 @@ def main():
     run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml restart omcs-nginx", timeout=60)
     time.sleep(5)
     
+    # 4. Verify
     run_cmd(ssh, "cd /opt/omcs && docker compose -f docker-compose.prod.yml ps")
+    run_cmd(ssh, "docker logs omcs-backend --tail 5 2>&1")
     run_cmd(ssh, "curl -s -o /dev/null -w 'Admin: %{http_code}' http://admin.omcs.com.ly; echo")
     
-    print("\n  All features deployed!")
+    # 5. Test activity log count
+    run_cmd(ssh, 'docker exec omcs-db psql -U omcs_user -d omcs -c "SELECT count(*) FROM activity_logs;"')
+    
+    print("\n  Activity log + Orders logging deployed!")
     ssh.close()
 
 if __name__ == "__main__":
