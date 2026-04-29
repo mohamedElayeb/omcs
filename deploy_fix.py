@@ -1,0 +1,18 @@
+import paramiko, sys, os
+sys.stdout.reconfigure(encoding='utf-8')
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect("102.203.200.71", username="root", password="Omcs@2025Secure!", timeout=30)
+sftp = ssh.open_sftp()
+sftp.put(r"C:\Users\USER\.gemini\antigravity\scratch\omcs\frontend\src\app\inventory\page.tsx", "/opt/omcs/frontend/src/app/inventory/page.tsx")
+print("[OK] Uploaded inventory page.tsx")
+sftp.close()
+for cmd in ["cd /opt/omcs && docker compose -f docker-compose.prod.yml build omcs-frontend", "cd /opt/omcs && docker compose -f docker-compose.prod.yml up -d omcs-frontend"]:
+    print(f"\n>> {cmd}")
+    stdin, stdout, stderr = ssh.exec_command(cmd, timeout=180)
+    exit_code = stdout.channel.recv_exit_status()
+    err = stderr.read().decode('utf-8', errors='replace')
+    if err.strip(): print(err.strip()[-500:])
+    print(f"[Exit: {exit_code}]")
+ssh.close()
+print("\n✅ Done!")

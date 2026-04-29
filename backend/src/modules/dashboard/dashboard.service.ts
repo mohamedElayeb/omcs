@@ -44,9 +44,20 @@ export class DashboardService {
 
         const sum = (arr: Sale[], key: 'total' | 'profit') => arr.reduce((s, x) => s + Number(x[key]), 0);
 
-        const lowStockItems = await this.invRepo.createQueryBuilder('i')
-            .where('i.quantity <= i.lowStockThreshold')
-            .getCount();
+        // Count low stock at PRODUCT level (not per variant/size)
+        // A product is "low stock" when the sum of ALL its variants' stock
+        // at a given branch is <= the minimum threshold of any variant
+        const lowStockRaw = await this.invRepo.createQueryBuilder('i')
+            .leftJoin('i.variant', 'v')
+            .select('v.product_id', 'productId')
+            .addSelect('i.branch_id', 'branchId')
+            .addSelect('SUM(i.quantity)', 'totalQty')
+            .addSelect('MIN(i.low_stock_threshold)', 'threshold')
+            .groupBy('v.product_id')
+            .addGroupBy('i.branch_id')
+            .having('SUM(i.quantity) <= 1')
+            .getRawMany();
+        const lowStockItems = lowStockRaw.length;
 
         return {
             today: { sales: sum(todaySales, 'total'), profit: sum(todaySales, 'profit'), count: todaySales.length },

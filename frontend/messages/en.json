@@ -74,7 +74,8 @@
         "prices": "Prices",
         "exchangeRate": "Exchange Rate",
         "barcodes": "Barcodes",
-        "returns": "Returns"
+        "returns": "Returns",
+        "activityLog": "Activity Log"
     },
     "login": {
         "title": "OMCS",
@@ -178,6 +179,7 @@
         "lowStockBadge": "Low Stock",
         "inStockBadge": "In Stock",
         "noStockBadge": "No Stock",
+        "archiveBadge": "📁 Archive",
         "variantsCount": "{{count}} variants",
         "editAction": "Edit",
         "inventoryAction": "Inventory",
@@ -580,7 +582,8 @@
         "belowBarcode": "Below barcode",
         "variant": "variant",
         "variants": "variants",
-        "selectedCount": "✓ {{count}} selected"
+        "selectedCount": "✓ {{count}} selected",
+        "printDirect": "Print Direct"
     },
     "returns": {
         "title": "Returns",
@@ -736,7 +739,11 @@
         "cardLabel": "CARD",
         "bankLabel": "BANK",
         "deliveryLabel": "DELIVERY",
-        "default": "Default"
+        "default": "Default",
+        "scanning": "Scanning",
+        "scannedAdded": "Added via scanner",
+        "barcodeNotFound": "Barcode not found",
+        "scannerReady": "📡 Barcode scanner ready — scan any barcode"
     },
     "pageTitles": {
         "dashboard": "Dashboard",

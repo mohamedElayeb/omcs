@@ -14,6 +14,7 @@ import { EventsModule } from './modules/events/events.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { StorefrontModule } from './modules/storefront/storefront.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { ActivityLogModule } from './modules/activity-log/activity-log.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { OrdersModule } from './modules/orders/orders.module';
     SettingsModule,
     StorefrontModule,
     OrdersModule,
+    ActivityLogModule,
   ],
 })
 export class AppModule { }

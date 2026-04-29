@@ -258,3 +258,13 @@ export const ordersApi = {
             token, method: 'PATCH', body: JSON.stringify(data),
         }),
 };
+
+// Activity Logs
+export const activityLogApi = {
+    findAll: (token: string, query: Record<string, string> = {}) => {
+        const params = new URLSearchParams(query);
+        return apiFetch<any>(`/api/activity-logs?${params.toString()}`, { token });
+    },
+    getActionCounts: (token: string) =>
+        apiFetch<any[]>('/api/activity-logs/action-counts', { token }),
+};

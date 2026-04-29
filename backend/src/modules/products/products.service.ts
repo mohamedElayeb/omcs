@@ -4,6 +4,7 @@ import { Repository, DataSource } from 'typeorm';
 import { Product, ProductVariant, Category, PriceHistory, Inventory, User } from '../../entities';
 import { ProductImage } from '../../entities/product-image.entity';
 import { EventsGateway } from '../events/events.gateway';
+import { ActivityLogService } from '../activity-log/activity-log.service';
 
 // Round UP to nearest 5 LYD (Libya pricing convention)
 const roundUp5 = (price: number): number => Math.ceil(price / 5) * 5;
@@ -19,6 +20,7 @@ export class ProductsService {
         @InjectRepository(ProductImage) private imageRepo: Repository<ProductImage>,
         private dataSource: DataSource,
         private events: EventsGateway,
+        private activityLog: ActivityLogService,
     ) { }
 
     // ── Categories ──
@@ -103,6 +105,13 @@ export class ProductsService {
         }
         const result = await this.findOne(saved.id);
         this.events.emitProductChanged({ productId: saved.id, action: 'created' });
+        this.activityLog.log({
+            action: 'PRODUCT_CREATE',
+            entityType: 'product',
+            entityId: saved.id,
+            description: `إنشاء منتج: ${data.name} — ${data.variants?.length || 0} متغير`,
+            details: { name: data.name, brand: data.brand, variants: data.variants?.length },
+        }).catch(() => {});
         return result;
     }
 
@@ -111,6 +120,13 @@ export class ProductsService {
         await this.productRepo.update(id, data);
         const result = await this.findOne(id);
         this.events.emitProductChanged({ productId: id, action: 'updated' });
+        this.activityLog.log({
+            action: 'PRODUCT_EDIT',
+            entityType: 'product',
+            entityId: id,
+            description: `تعديل منتج: ${result.name}`,
+            details: { changes: data },
+        }).catch(() => {});
         return result;
     }
 

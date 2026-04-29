@@ -1,0 +1,197 @@
+{
+  "products": [
+    {
+      "product_id": 1245,
+      "product_name": "VAGANZA lineo",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/UvWxDmdc.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1244,
+      "product_name": "Vaganza 4092",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/esqmyKyH.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1243,
+      "product_name": "Vaganza jacket",
+      "category": "Sweatshirts",
+      "image_url": "https://api.outletmaster.ly/images/kkUkxQgR.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1242,
+      "product_name": "Dsq",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/dTxvCHIp.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1241,
+      "product_name": "Diesel",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/cwzLCNoE.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1240,
+      "product_name": "Diesel",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/yeEjzRGF.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1239,
+      "product_name": "D&G",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/IRFVYzsr.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1238,
+      "product_name": "Diesel",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/bupjYWKc.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1237,
+      "product_name": "Vaganza 4090",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/HUSFMWjr.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1236,
+      "product_name": "Loropiana",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/VmRrYMrG.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1235,
+      "product_name": "Vaganza Tv4083",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/qBpeLCfy.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1234,
+      "product_name": "Vaganza Tv4085",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/nfHhRnnt.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1233,
+      "product_name": "Vaganza Tv4094",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/BRaIvtmr.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1232,
+      "product_name": "Vaganza vm7022",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/VUYPpVFp.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1231,
+      "product_name": "Vaganza Vt1041 gray",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/IMlpgcUy.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1230,
+      "product_name": "Zegna lino",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/lDYfYaIv.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1229,
+      "product_name": "Zegna lino",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/cyXkukXU.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1228,
+      "product_name": "Zegna lino",
+      "category": "T-Shirts",
+      "image_url": "https://api.outletmaster.ly/images/mIxSRJnq.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1227,
+      "product_name": "D&G blue",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/rNdNlKzU.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1226,
+      "product_name": "D&G black",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/LMJIswxg.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1225,
+      "product_name": "D&g  gray",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/XQvoMehR.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1224,
+      "product_name": "Zegna  biege",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/YXnjAaob.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1223,
+      "product_name": "Zegna blue",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/bgHUmUMd.webp",
+      "on_sale": false,
+      "status": 1
+    },
+    {
+      "product_id": 1222,
+      "product_name": "Zegna black",
+      "category": "Jeans",
+      "image_url": "https://api.outletmaster.ly/images/tRWxbAvA.webp",
+      "on_sale": false,
+      "status": 1
+    }
+  ],
+  "totalItems": 1178
+}

@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuthStore } from '../../lib/store';
 import { inventoryApi, branchesApi } from '../../lib/api';
 import { useSocket } from '../../lib/useSocket';
@@ -38,13 +39,15 @@ export default function InventoryPage() {
     const { on } = useSocket();
     const toast = useToast();
     const { t } = useTranslation();
+    const searchParams = useSearchParams();
+    const initialSearch = searchParams.get('search') || '';
     const [groups, setGroups] = useState<GroupedProduct[]>([]);
     const [flatInventory, setFlatInventory] = useState<any[]>([]);
     const [alerts, setAlerts] = useState<any[]>([]);
     const [lowStockAlerts, setLowStockAlerts] = useState<any[]>([]);
     const [branches, setBranches] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(initialSearch);
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [viewMode, setViewMode] = useState<ViewMode>('grouped');
     const [stockFilter, setStockFilter] = useState<'all' | 'inStock' | 'lowStock' | 'outOfStock'>('all');
@@ -126,9 +129,11 @@ export default function InventoryPage() {
     // Groups — apply client-side stock filter on top of backend results
     const filteredGroups = useMemo(() => {
         return groups.filter(g => {
+            // Default view hides 0-stock products (they go to Archive)
+            if (stockFilter === 'all' && g.totalQuantity <= 0) return false;
             if (stockFilter === 'inStock' && g.totalQuantity <= 0) return false;
             if (stockFilter === 'outOfStock' && g.totalQuantity > 0) return false;
-            if (stockFilter === 'lowStock' && g.lowStockCount <= 0) return false;
+            if (stockFilter === 'lowStock' && !(g.totalQuantity > 0 && g.totalQuantity <= 1)) return false;
             return true;
         });
     }, [groups, stockFilter]);
@@ -146,7 +151,8 @@ export default function InventoryPage() {
                     (v.product?.brand || '').toLowerCase().includes(q);
                 if (!matchSearch) return false;
             }
-            // Stock filter
+            // Stock filter — default hides 0-stock (archive)
+            if (stockFilter === 'all' && item.quantity <= 0) return false;
             if (stockFilter === 'inStock' && item.quantity <= 0) return false;
             if (stockFilter === 'outOfStock' && item.quantity > 0) return false;
             if (stockFilter === 'lowStock' && item.quantity > (item.lowStockThreshold || 5)) return false;
@@ -157,7 +163,7 @@ export default function InventoryPage() {
     // ─── STATS ───
     const totalProducts = filteredGroups.length;
     const totalStock = filteredGroups.reduce((s, g) => s + g.totalQuantity, 0);
-    const lowStockProducts = filteredGroups.filter(g => g.lowStockCount > 0).length;
+    const lowStockProducts = filteredGroups.filter(g => g.totalQuantity > 0 && g.totalQuantity <= 1).length;
     const totalValue = filteredGroups.reduce((s, g) => s + (g.inventoryValue || 0), 0);
 
     if (loading) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>{t('common.loading')}</div>;
@@ -218,7 +224,7 @@ export default function InventoryPage() {
                         { key: 'all' as const, label: t('products.stockAll') },
                         { key: 'inStock' as const, label: t('products.inStockBadge') },
                         { key: 'lowStock' as const, label: t('products.lowStockBadge') },
-                        { key: 'outOfStock' as const, label: t('products.noStockBadge') },
+                        { key: 'outOfStock' as const, label: t('products.archiveBadge') },
                     ].map(chip => (
                         <button
                             key={chip.key}
@@ -270,25 +276,21 @@ export default function InventoryPage() {
                         <table>
                             <thead>
                                 <tr style={{ fontSize: 11 }}>
-                                    <th>{t('inventory.sku')}</th><th>{t('inventory.th.product')}</th><th>{t('inventory.th.branch')}</th><th>{t('inventory.th.qty')}</th><th>{t('inventory.th.status')}</th><th></th>
+                                    <th>{t('inventory.th.product')}</th><th>{t('inventory.th.branch')}</th><th>{t('inventory.th.qty')}</th><th>{t('inventory.th.status')}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {lowStockAlerts.slice(0, 15).map((a: any) => (
-                                    <tr key={`${a.variantId}-${a.branchId}`}>
-                                        <td><span className="badge badge-red">{a.sku || a.variant?.sku || '?'}</span></td>
-                                        <td style={{ fontSize: 12 }}>{a.productName || a.variant?.product?.name || '—'} {(a.size || a.variant?.size) ? `(${a.size || a.variant?.size})` : ''}</td>
-                                        <td style={{ fontSize: 12 }}>{a.branchName || a.branch?.name || '—'}</td>
-                                        <td style={{ fontWeight: 700, color: (a.totalQuantity ?? a.quantity) === 0 ? 'var(--red)' : 'var(--gold)' }}>{a.totalQuantity ?? a.quantity}</td>
-                                        <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>≤ {a.threshold ?? a.lowStockThreshold}</td>
-                                        <td>
-                                            {canManage && (
-                                                <button className="btn btn-primary btn-sm" style={{ fontSize: 10 }}
-                                                    onClick={() => setShowRestock({ variantId: a.variantId, branchId: a.branchId, sku: a.sku || a.variant?.sku || '' })}>
-                                                    📦 Restock
-                                                </button>
-                                            )}
+                                    <tr key={`${a.productId}-${a.branchId}`}
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => setExpanded(`${a.productId}__${a.branchId}`)}>
+                                        <td style={{ fontSize: 12, fontWeight: 600 }}>
+                                            {a.productName || '—'}
+                                            {a.brand && <span style={{ color: 'var(--text-muted)', fontWeight: 400, marginInlineStart: 6 }}>{a.brand}</span>}
                                         </td>
+                                        <td style={{ fontSize: 12 }}>{a.branchName || '—'}</td>
+                                        <td style={{ fontWeight: 700, color: Number(a.totalQuantity) === 0 ? 'var(--red)' : 'var(--gold)' }}>{a.totalQuantity}</td>
+                                        <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>≤ {a.threshold}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -296,7 +298,7 @@ export default function InventoryPage() {
                     </div>
                     {lowStockAlerts.length > 15 && (
                         <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-                            +{lowStockAlerts.length - 15} more items below threshold. Use the "Low stock only" filter to see all.
+                            +{lowStockAlerts.length - 15} {t('common.more')}
                         </div>
                     )}
                 </div>
@@ -324,8 +326,9 @@ export default function InventoryPage() {
                                     const key = `${group.productId}__${group.branchId}`;
                                     const isExpanded = expanded === key;
                                     const groupValue = group.inventoryValue || 0; // historical cost from backend, NEVER uses salePrice
-                                    const hasOut = group.variants.some(v => v.quantity === 0);
-                                    const hasLow = group.lowStockCount > 0;
+                                    // Product-level status: based on TOTAL quantity, not individual sizes
+                                    const isOut = group.totalQuantity === 0;
+                                    const isLow = group.totalQuantity > 0 && group.totalQuantity <= 1;
                                     return (
                                         <React.Fragment key={key}>
                                             <tr style={{ cursor: 'pointer' }}
@@ -358,19 +361,20 @@ export default function InventoryPage() {
                                                 <td>
                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                                                         {group.variants.map((v, vi) => {
-                                                            const isLow = v.quantity <= 5;
-                                                            const isOut = v.quantity === 0;
+                                                            const isVarOut = v.quantity === 0;
+                                                            // Only show red if the PRODUCT total is <= 1
+                                                            const showRed = isLow || isOut;
                                                             return (
                                                                 <span key={v.variantId} style={{ display: 'inline-flex', alignItems: 'center' }}>
                                                                     <span style={{
                                                                         fontSize: 12, fontWeight: 600,
                                                                         padding: '1px 7px', borderRadius: 5,
-                                                                        background: isOut ? 'rgba(239,68,68,0.18)' : isLow ? 'rgba(239,68,68,0.10)' : 'rgba(255,255,255,0.05)',
-                                                                        color: isOut ? '#ef4444' : isLow ? '#ef4444' : 'var(--text-primary)',
-                                                                        border: `1px solid ${isOut || isLow ? 'rgba(239,68,68,0.35)' : 'var(--border)'}`,
+                                                                        background: isVarOut ? 'rgba(239,68,68,0.18)' : showRed ? 'rgba(239,68,68,0.10)' : 'rgba(255,255,255,0.05)',
+                                                                        color: isVarOut ? '#ef4444' : showRed ? '#ef4444' : 'var(--text-primary)',
+                                                                        border: `1px solid ${isVarOut || showRed ? 'rgba(239,68,68,0.35)' : 'var(--border)'}`,
                                                                     }}>
                                                                         {v.size || v.color || 'STD'}{' '}
-                                                                        <span style={{ fontWeight: 800, opacity: isOut ? 0.6 : 1 }}>({v.quantity})</span>
+                                                                        <span style={{ fontWeight: 800, opacity: isVarOut ? 0.6 : 1 }}>({v.quantity})</span>
                                                                     </span>
                                                                     {vi < group.variants.length - 1 && (
                                                                         <span style={{ margin: '0 2px', color: 'var(--text-muted)', fontSize: 10 }}>•</span>
@@ -382,14 +386,14 @@ export default function InventoryPage() {
                                                 </td>
                                                 <td style={{
                                                     fontWeight: 700, fontSize: 15,
-                                                    color: hasOut ? '#ef4444' : hasLow ? 'var(--gold)' : 'var(--text-primary)',
+                                                    color: isOut ? '#ef4444' : isLow ? 'var(--gold)' : 'var(--text-primary)',
                                                 }}>
                                                     {group.totalQuantity}
                                                 </td>
                                                 <td style={{ color: 'var(--gold)', fontWeight: 500, whiteSpace: 'nowrap' }}>{fmt(groupValue)}</td>
                                                 <td>
-                                                    {hasOut ? <span className="badge badge-red">{t('inventory.hasOut')}</span>
-                                                        : hasLow ? <span className="badge badge-gold">{t('inventory.statusLow')}</span>
+                                                    {isOut ? <span className="badge badge-red">{t('inventory.hasOut')}</span>
+                                                        : isLow ? <span className="badge badge-gold">{t('inventory.statusLow')}</span>
                                                             : <span className="badge badge-green">{t('inventory.statusOk')}</span>}
                                                 </td>
                                             </tr>

@@ -1,11 +1,20 @@
 'use client';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useAuthStore } from '../../lib/store';
 import { productsApi, salesApi, authApi, inventoryApi, categoriesApi } from '../../lib/api';
 import { useSocket } from '../../lib/useSocket';
 import { addToOutbox, generateIdempotencyKey } from '../../lib/outbox';
 import { useToast } from '../../components/Toast';
 import { useTranslation } from '../../lib/i18n';
+
+// Sanitize SKU for barcode encoding — must match barcodes page logic
+const sanitizeForBarcode = (sku: string): string => {
+    const ascii = sku.replace(/[^\x20-\x7E]/g, '').trim();
+    if (ascii.length >= 3) return ascii;
+    let h = 0;
+    for (let i = 0; i < sku.length; i++) h = ((h << 5) - h + sku.charCodeAt(i)) | 0;
+    return 'OM' + Math.abs(h % 100000000).toString().padStart(8, '0');
+};
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:4000` : 'http://localhost:4000');
 
@@ -57,6 +66,12 @@ export default function POSPage() {
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
+    // ─── Barcode Scanner ───
+    const [scannerBuffer, setScannerBuffer] = useState('');
+    const [scannerActive, setScannerActive] = useState(false);
+    const scannerTimeout = useRef<NodeJS.Timeout | null>(null);
+    const lastKeyTime = useRef<number>(0);
+
     const branchId = selectedBranchId || user?.branch?.id;
 
     // Load products, categories, and inventory
@@ -90,6 +105,98 @@ export default function POSPage() {
         });
         return () => unsub();
     }, [on]);
+
+    // ─── Barcode Scanner Listener ───
+    // Barcode scanners act as keyboard wedge: they type characters very fast then press Enter
+    // We detect rapid sequential keystrokes (< 50ms apart) and treat them as a scan
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Ignore if user is typing in an input/textarea
+            const tag = (e.target as HTMLElement)?.tagName;
+            const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+            const now = Date.now();
+            const timeDiff = now - lastKeyTime.current;
+            lastKeyTime.current = now;
+
+            // If Enter is pressed with buffer content, try to process the scan
+            if (e.key === 'Enter' && scannerBuffer.length >= 3) {
+                e.preventDefault();
+                e.stopPropagation();
+                processScan(scannerBuffer);
+                setScannerBuffer('');
+                setScannerActive(false);
+                if (scannerTimeout.current) clearTimeout(scannerTimeout.current);
+                return;
+            }
+
+            // Only accumulate single printable characters typed rapidly
+            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                // If time between keystrokes is < 80ms, it's likely a scanner
+                if (timeDiff < 80 || scannerBuffer.length > 0) {
+                    if (isInput && scannerBuffer.length === 0 && timeDiff > 80) {
+                        // First character typed slowly in an input — normal typing, ignore
+                        return;
+                    }
+                    // If we're in an input and scanner is active, prevent default
+                    if (isInput && scannerBuffer.length > 0) {
+                        e.preventDefault();
+                    }
+                    setScannerBuffer(prev => prev + e.key);
+                    setScannerActive(true);
+                    // Reset timeout — if no more chars come in 150ms, it was probably manual typing
+                    if (scannerTimeout.current) clearTimeout(scannerTimeout.current);
+                    scannerTimeout.current = setTimeout(() => {
+                        setScannerBuffer('');
+                        setScannerActive(false);
+                    }, 150);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown, true);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown, true);
+            if (scannerTimeout.current) clearTimeout(scannerTimeout.current);
+        };
+    }, [scannerBuffer, products, inventory, cart]);
+
+    // Process a scanned barcode value
+    const processScan = useCallback((scannedValue: string) => {
+        const code = scannedValue.trim();
+        if (code.length < 3) return;
+
+        // Find the variant matching the scanned barcode
+        // Check both: raw SKU match and sanitized barcode match
+        let matchedProduct: any = null;
+        let matchedVariant: any = null;
+
+        for (const product of products) {
+            for (const variant of (product.variants || [])) {
+                const sku = variant.sku || '';
+                const barcodeValue = sanitizeForBarcode(sku);
+                if (sku === code || sku.toUpperCase() === code.toUpperCase() ||
+                    barcodeValue === code || barcodeValue.toUpperCase() === code.toUpperCase()) {
+                    matchedProduct = product;
+                    matchedVariant = variant;
+                    break;
+                }
+            }
+            if (matchedVariant) break;
+        }
+
+        if (matchedVariant && matchedProduct) {
+            const stock = getStock(matchedVariant.id);
+            if (stock <= 0) {
+                toast.error(`⚠️ ${matchedProduct.name} (${matchedVariant.size || matchedVariant.sku}) — ${t('pos.outOfStock')}`);
+                return;
+            }
+            addToCart(matchedProduct, matchedVariant);
+            toast.success(`✅ ${matchedProduct.name} ${matchedVariant.size || ''} — ${t('pos.scannedAdded')}`);
+        } else {
+            toast.error(`❌ ${t('pos.barcodeNotFound')}: ${code}`);
+        }
+    }, [products, inventory, cart, toast, t]);
 
     const getStock = (variantId: string) => {
         const inv = inventory.find(i => i.variantId === variantId);
@@ -236,11 +343,17 @@ export default function POSPage() {
             ? filtered
             : filtered.filter(p => p.categoryId === selectedCategory);
 
+        // Filter out products with 0 stock in the selected branch
+        const stockFiltered = catFiltered.filter(p => {
+            const totalStock = (p.variants || []).reduce((sum: number, v: any) => sum + getStock(v.id), 0);
+            return totalStock > 0;
+        });
+
         // Group by category
         const groups: { categoryName: string; categoryId: string; products: any[] }[] = [];
         const catMap = new Map<string, any[]>();
 
-        for (const p of catFiltered) {
+        for (const p of stockFiltered) {
             const catId = p.categoryId || 'uncategorized';
             if (!catMap.has(catId)) catMap.set(catId, []);
             catMap.get(catId)!.push(p);
@@ -262,7 +375,7 @@ export default function POSPage() {
         });
 
         return groups;
-    }, [products, categories, search, selectedCategory, t]);
+    }, [products, categories, search, selectedCategory, inventory, t]);
 
     // Available categories for filter tabs
     const availableCategories = useMemo(() => {
@@ -272,11 +385,26 @@ export default function POSPage() {
 
     return (
         <div className="pos-layout">
+            {/* Barcode Scanner Indicator */}
+            {scannerActive && (
+                <div style={{
+                    position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
+                    zIndex: 9999, background: 'rgba(34, 197, 94, 0.95)', color: '#fff',
+                    padding: '8px 24px', borderRadius: 30, fontSize: 14, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)',
+                    animation: 'pulse 0.5s ease-in-out infinite',
+                }}>
+                    <span style={{ fontSize: 20 }}>📡</span>
+                    {t('pos.scanning')}... <span style={{ fontFamily: 'monospace', letterSpacing: 2 }}>{scannerBuffer}</span>
+                </div>
+            )}
+
             {/* Left: Products */}
             <div className="pos-products">
                 {/* Search bar */}
-                <div style={{ marginBottom: 12 }}>
-                    <div className="simple-search__wrap">
+                <div style={{ marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <div className="simple-search__wrap" style={{ flex: 1 }}>
                         <span className="simple-search__icon">🔍</span>
                         <input
                             type="text"
@@ -295,6 +423,15 @@ export default function POSPage() {
                                 type="button"
                             >✕</button>
                         )}
+                    </div>
+                    {/* Scanner status indicator */}
+                    <div title={t('pos.scannerReady')} style={{
+                        width: 36, height: 36, borderRadius: 10,
+                        background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 18, cursor: 'default',
+                    }}>
+                        📡
                     </div>
                 </div>
 

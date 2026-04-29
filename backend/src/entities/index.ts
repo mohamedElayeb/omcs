@@ -23,3 +23,4 @@ export { OrderItem } from './order-item.entity';
 export { StockReservation } from './stock-reservation.entity';
 // Phase 3 — POS + Inventory Operations
 export { StockLedger } from './stock-ledger.entity';
+export { ActivityLog } from './activity-log.entity';

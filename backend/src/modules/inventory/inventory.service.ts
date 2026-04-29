@@ -4,6 +4,7 @@ import { Repository, DataSource } from 'typeorm';
 import { Inventory, StockMovement, StockTransfer, ProductVariant, StockLedger } from '../../entities';
 import { StockMovementAction, TransferStatus } from '../../common/enums';
 import { EventsGateway } from '../events/events.gateway';
+import { ActivityLogService } from '../activity-log/activity-log.service';
 
 @Injectable()
 export class InventoryService {
@@ -15,6 +16,7 @@ export class InventoryService {
         @InjectRepository(StockLedger) private ledgerRepo: Repository<StockLedger>,
         private dataSource: DataSource,
         private events: EventsGateway,
+        private activityLog: ActivityLogService,
     ) { }
 
     async findAll(branchId?: string) {
@@ -38,13 +40,13 @@ export class InventoryService {
             .addSelect('b.id', 'branchId')
             .addSelect('b.name', 'branchName')
             .addSelect('SUM(i.quantity)', 'totalQty')
-            .addSelect('MIN(i.low_stock_threshold)', 'threshold')
+            .addSelect('1', 'threshold')
             .groupBy('p.id')
             .addGroupBy('p.name')
             .addGroupBy('p.brand')
             .addGroupBy('b.id')
             .addGroupBy('b.name')
-            .having('SUM(i.quantity) <= MIN(i.low_stock_threshold)')
+            .having('SUM(i.quantity) <= 1')
             .orderBy('SUM(i.quantity)', 'ASC');
         return qb.getRawMany();
     }
@@ -282,6 +284,18 @@ export class InventoryService {
 
             // Emit event with total quantity
             this.events.emitInventoryUpdated({ variantId, branchId, quantity: totalQty });
+
+            // Log activity
+            const variant = await em.findOne(ProductVariant, { where: { id: variantId }, relations: ['product'] });
+            this.activityLog.log({
+                action: 'RESTOCK',
+                entityType: 'inventory',
+                entityId: variantId,
+                description: `تعبئة ${variant?.product?.name || ''} (${variant?.size || variant?.sku}) +${quantity} → ${totalQty}`,
+                details: { variantId, sku: variant?.sku, quantity, totalAfter: totalQty },
+                userId,
+                branchId,
+            }).catch(() => {});
 
             return inv;
         });
@@ -728,13 +742,13 @@ export class InventoryService {
             .addSelect('i.branch_id', 'branchId')
             .addSelect('b.name', 'branchName')
             .addSelect('SUM(i.quantity)', 'totalQty')
-            .addSelect('MIN(i.low_stock_threshold)', 'threshold')
+            .addSelect('1', 'threshold')
             .groupBy('p.id')
             .addGroupBy('p.name')
             .addGroupBy('p.brand')
             .addGroupBy('i.branch_id')
             .addGroupBy('b.name')
-            .having('SUM(i.quantity) <= MIN(i.low_stock_threshold)')
+            .having('SUM(i.quantity) <= 1')
             .andHaving('SUM(i.quantity) > 0');
         if (branchId) qb.andWhere('i.branch_id = :bid', { bid: branchId });
         const raw = await qb.getRawMany();

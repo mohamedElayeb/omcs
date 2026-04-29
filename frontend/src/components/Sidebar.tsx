@@ -16,6 +16,7 @@ const allNavItems = [
     { href: '/prices', labelKey: 'nav.prices', icon: '💲', roles: ['OWNER', 'MANAGER'] },
     { href: '/exchange-rate', labelKey: 'nav.exchangeRate', icon: '💱', roles: ['OWNER', 'MANAGER'] },
     { href: '/barcodes', labelKey: 'nav.barcodes', icon: '🏷️', roles: ['OWNER', 'MANAGER'] },
+    { href: '/activity-log', labelKey: 'nav.activityLog', icon: '📋', roles: ['OWNER', 'MANAGER'] },
 ];
 
 export default function Sidebar() {

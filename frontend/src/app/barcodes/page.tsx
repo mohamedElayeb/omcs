@@ -313,11 +313,10 @@ export default function BarcodesPage() {
             const labelW = config.width;
             const labelH = config.height;
             const cols = config.columnsPerRow;
-            const gap = 2; // mm gap between labels
+            const gap = 2;
 
-            // Calculate page layout
-            const pageW = cols * labelW + (cols - 1) * gap + 4; // 2mm margin each side
-            const pageH = 297; // A4 height in mm
+            const pageW = cols * labelW + (cols - 1) * gap + 4;
+            const pageH = 297;
             const rowsPerPage = Math.floor((pageH - 4) / (labelH + gap));
 
             const pdf = new jsPDF({
@@ -339,7 +338,6 @@ export default function BarcodesPage() {
                         const x = 2 + col * (labelW + gap);
                         const y = 2 + row * (labelH + gap);
 
-                        // Label border (dashed)
                         pdf.setDrawColor(200);
                         pdf.setLineWidth(0.1);
                         pdf.rect(x, y, labelW, labelH);
@@ -348,7 +346,6 @@ export default function BarcodesPage() {
                         const innerW = labelW - config.paddingX * 2;
                         let curY = y + config.paddingY + config.marginTop;
 
-                        // Product name (top)
                         if (config.showName && config.namePosition === 'top') {
                             pdf.setFontSize(config.nameFontSize);
                             pdf.setFont('helvetica', 'bold');
@@ -357,7 +354,6 @@ export default function BarcodesPage() {
                             curY += config.nameFontSize * 0.4 + 1;
                         }
 
-                        // Barcode
                         if (config.showBarcode) {
                             const canvas = document.createElement('canvas');
                             try {
@@ -380,7 +376,6 @@ export default function BarcodesPage() {
                             } catch (e) { /* skip barcode */ }
                         }
 
-                        // SKU text
                         if (config.showSku) {
                             pdf.setFontSize(config.skuFontSize);
                             pdf.setFont('helvetica', 'normal');
@@ -388,7 +383,6 @@ export default function BarcodesPage() {
                             curY += config.skuFontSize * 0.4 + 0.5;
                         }
 
-                        // Price
                         if (config.showPrice) {
                             pdf.setFontSize(config.priceFontSize);
                             pdf.setFont('helvetica', 'bold');
@@ -397,7 +391,6 @@ export default function BarcodesPage() {
                             curY += config.priceFontSize * 0.4 + 0.5;
                         }
 
-                        // Product name (bottom)
                         if (config.showName && config.namePosition === 'bottom') {
                             pdf.setFontSize(config.nameFontSize);
                             pdf.setFont('helvetica', 'bold');
@@ -417,6 +410,75 @@ export default function BarcodesPage() {
             setExporting(false);
         }
     };
+
+    // ─── Direct Print ───
+    const printDirect = () => {
+        if (labels.length === 0) return;
+        const labelW = config.width;
+        const labelH = config.height;
+        const cols = config.columnsPerRow;
+        const gap = 2;
+
+        // Build label HTML
+        let labelsHtml = '';
+        for (const label of labels) {
+            const barcodeValue = sanitizeForBarcode(label.sku);
+            let inner = '';
+
+            if (config.showName && config.namePosition === 'top') {
+                const name = label.productName + (label.size ? ` ${label.size}` : '') + (label.color ? ` ${label.color}` : '');
+                inner += `<div style="font-size:${config.nameFontSize}pt;font-weight:700;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;margin-bottom:1px;">${name}</div>`;
+            }
+            if (config.showBarcode) {
+                inner += `<svg class="barcode" data-value="${barcodeValue}" data-height="${mmToPx(config.barcodeHeight)}" data-width="${config.barcodeXScale}"></svg>`;
+            }
+            if (config.showSku) {
+                inner += `<div style="font-size:${config.skuFontSize}pt;font-family:monospace;letter-spacing:0.5px;margin-top:1px;text-align:center;">${label.sku}</div>`;
+            }
+            if (config.showPrice) {
+                inner += `<div style="font-size:${config.priceFontSize}pt;font-weight:800;text-align:center;margin-top:1px;">${fmtPrice(label.salePrice)} LYD</div>`;
+            }
+            if (config.showName && config.namePosition === 'bottom') {
+                const name = label.productName + (label.size ? ` ${label.size}` : '');
+                inner += `<div style="font-size:${config.nameFontSize}pt;font-weight:700;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;margin-top:auto;">${name}</div>`;
+            }
+
+            labelsHtml += `<div style="width:${labelW}mm;height:${labelH}mm;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:${config.paddingY}mm ${config.paddingX}mm;box-sizing:border-box;page-break-inside:avoid;">${inner}</div>`;
+        }
+
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
+        if (!printWindow) { toast.error('Popup blocked — allow popups for this site'); return; }
+
+        printWindow.document.write(`<!DOCTYPE html>
+<html><head><title>OMCS Barcode Labels</title>
+<style>
+  @page { margin: 2mm; size: auto; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #000; background: #fff; }
+  .labels-grid {
+    display: flex; flex-wrap: wrap; gap: ${gap}mm;
+    justify-content: flex-start;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"><\/script>
+</head><body>
+<div class="labels-grid">${labelsHtml}</div>
+<script>
+  document.querySelectorAll('.barcode').forEach(svg => {
+    try {
+      JsBarcode(svg, svg.dataset.value, {
+        format: 'CODE128', width: parseFloat(svg.dataset.width),
+        height: parseInt(svg.dataset.height), displayValue: false,
+        margin: 0, background: 'transparent',
+      });
+    } catch(e) {}
+  });
+  setTimeout(() => { window.print(); }, 500);
+<\/script>
+</body></html>`);
+        printWindow.document.close();
+    };
+
 
     const fmtPrice = (n: number) => roundUp5(n).toLocaleString('en-US');
 
@@ -704,10 +766,15 @@ export default function BarcodesPage() {
                     <div style={{ flex: 1, fontSize: 13, color: 'var(--text-secondary)', minWidth: 0 }}>
                         {labels.length} label{labels.length !== 1 ? 's' : ''} • {config.width}×{config.height}mm • X-scale {config.barcodeXScale}
                     </div>
-                    <button className="btn btn-primary" onClick={exportPDF}
+                    <button className="btn btn-secondary" onClick={exportPDF}
                         disabled={labels.length === 0 || exporting}
+                        style={{ whiteSpace: 'nowrap', fontSize: 12 }}>
+                        {exporting ? '⏳...' : '📄 PDF'}
+                    </button>
+                    <button className="btn btn-primary" onClick={printDirect}
+                        disabled={labels.length === 0}
                         style={{ whiteSpace: 'nowrap' }}>
-                        {exporting ? '⏳ Exporting...' : '📄 Export PDF'}
+                        🖨️ {t('barcodes.printDirect')}
                     </button>
                 </div>
 

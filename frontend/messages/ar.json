@@ -74,7 +74,8 @@
         "prices": "الأسعار",
         "exchangeRate": "سعر الصرف",
         "barcodes": "الباركود",
-        "returns": "المرتجعات"
+        "returns": "ترجيع",
+        "activityLog": "سجل النشاطات"
     },
     "login": {
         "title": "OMCS",
@@ -178,6 +179,7 @@
         "lowStockBadge": "مخزون منخفض",
         "inStockBadge": "متوفر",
         "noStockBadge": "لا يوجد مخزون",
+        "archiveBadge": "📁 الأرشيف",
         "variantsCount": "{{count}} متغير",
         "editAction": "تعديل",
         "inventoryAction": "المخزون",
@@ -580,7 +582,8 @@
         "belowBarcode": "تحت الباركود",
         "variant": "متغير",
         "variants": "متغيرات",
-        "selectedCount": "✓ {{count}} محدد"
+        "selectedCount": "✓ {{count}} محدد",
+        "printDirect": "طباعة مباشرة"
     },
     "returns": {
         "title": "المرتجعات",
@@ -736,7 +739,11 @@
         "cardLabel": "بطاقة",
         "bankLabel": "حواله",
         "deliveryLabel": "توصيل",
-        "default": "افتراضي"
+        "default": "افتراضي",
+        "scanning": "جاري المسح",
+        "scannedAdded": "تمت الإضافة عبر الماسح",
+        "barcodeNotFound": "لم يتم العثور على الباركود",
+        "scannerReady": "📡 ماسح الباركود جاهز - قم بمسح أي باركود"
     },
     "pageTitles": {
         "dashboard": "لوحة التحكم",

@@ -1,0 +1,244 @@
+{
+  "lookups": [
+    {
+      "label": "Seyhia",
+      "value": 1001,
+      "type": 1
+    },
+    {
+      "label": "Nofliin",
+      "value": 1002,
+      "type": 1
+    },
+    {
+      "label": "POS",
+      "value": 2001,
+      "type": 2
+    },
+    {
+      "label": "Online",
+      "value": 2002,
+      "type": 2
+    },
+    {
+      "label": "Sytem admin",
+      "value": 3001,
+      "type": 3
+    },
+    {
+      "label": "User",
+      "value": 3002,
+      "type": 3
+    },
+    {
+      "label": "Cash",
+      "value": 4001,
+      "type": 4
+    },
+    {
+      "label": "Card",
+      "value": 4002,
+      "type": 4
+    },
+    {
+      "label": "T-Shirts",
+      "value": 7001,
+      "type": 7
+    },
+    {
+      "label": "Shorts",
+      "value": 7002,
+      "type": 7
+    },
+    {
+      "label": "Jeans",
+      "value": 7003,
+      "type": 7
+    },
+    {
+      "label": "Hoodies",
+      "value": 7004,
+      "type": 7
+    },
+    {
+      "label": "Sweatshirts",
+      "value": 7005,
+      "type": 7
+    },
+    {
+      "label": "Jackets",
+      "value": 7006,
+      "type": 7
+    },
+    {
+      "label": "Cargo Pants",
+      "value": 7007,
+      "type": 7
+    },
+    {
+      "label": "Sweatpants",
+      "value": 7008,
+      "type": 7
+    },
+    {
+      "label": "Sneakers",
+      "value": 7009,
+      "type": 7
+    },
+    {
+      "label": "Bags",
+      "value": 7010,
+      "type": 7
+    },
+    {
+      "label": "Misc",
+      "value": 7011,
+      "type": 7
+    },
+    {
+      "label": "Standard",
+      "value": 8001,
+      "type": 8
+    },
+    {
+      "label": "S",
+      "value": 8002,
+      "type": 8
+    },
+    {
+      "label": "M",
+      "value": 8003,
+      "type": 8
+    },
+    {
+      "label": "L",
+      "value": 8004,
+      "type": 8
+    },
+    {
+      "label": "XL",
+      "value": 8005,
+      "type": 8
+    },
+    {
+      "label": "XXL",
+      "value": 8006,
+      "type": 8
+    },
+    {
+      "label": "29",
+      "value": 8007,
+      "type": 8
+    },
+    {
+      "label": "30",
+      "value": 8008,
+      "type": 8
+    },
+    {
+      "label": "31",
+      "value": 8009,
+      "type": 8
+    },
+    {
+      "label": "32",
+      "value": 8010,
+      "type": 8
+    },
+    {
+      "label": "33",
+      "value": 8011,
+      "type": 8
+    },
+    {
+      "label": "34",
+      "value": 8012,
+      "type": 8
+    },
+    {
+      "label": "36",
+      "value": 8013,
+      "type": 8
+    },
+    {
+      "label": "41",
+      "value": 8014,
+      "type": 8
+    },
+    {
+      "label": "42",
+      "value": 8015,
+      "type": 8
+    },
+    {
+      "label": "43",
+      "value": 8016,
+      "type": 8
+    },
+    {
+      "label": "44",
+      "value": 8017,
+      "type": 8
+    },
+    {
+      "label": "45",
+      "value": 8018,
+      "type": 8
+    },
+    {
+      "label": "37",
+      "value": 8019,
+      "type": 8
+    },
+    {
+      "label": "38",
+      "value": 8020,
+      "type": 8
+    },
+    {
+      "label": "39",
+      "value": 8021,
+      "type": 8
+    },
+    {
+      "label": "XS",
+      "value": 8022,
+      "type": 8
+    },
+    {
+      "label": "40",
+      "value": 8023,
+      "type": 8
+    },
+    {
+      "label": "3XL",
+      "value": 8024,
+      "type": 8
+    },
+    {
+      "label": "4XL",
+      "value": 8025,
+      "type": 8
+    },
+    {
+      "label": "5XL",
+      "value": 8026,
+      "type": 8
+    },
+    {
+      "label": "6XL",
+      "value": 8027,
+      "type": 8
+    },
+    {
+      "label": "7XL",
+      "value": 8028,
+      "type": 8
+    },
+    {
+      "label": "Cash on Delivery",
+      "value": 9001,
+      "type": 9
+    }
+  ]
+}

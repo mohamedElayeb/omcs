@@ -5,6 +5,7 @@ import { Sale, SaleItem, Inventory, StockMovement, ProductVariant, DeliveryLog, 
 import { StockMovementAction, PaymentMethod, SaleStatus, DeliveryPaidStatus, TransferPaymentStatus } from '../../common/enums';
 import { User } from '../../entities';
 import { EventsGateway } from '../events/events.gateway';
+import { ActivityLogService } from '../activity-log/activity-log.service';
 
 interface CreateSaleDto {
     branchId: string;
@@ -41,6 +42,7 @@ export class SalesService {
         @InjectRepository(StockLedger) private ledgerRepo: Repository<StockLedger>,
         private dataSource: DataSource,
         private events: EventsGateway,
+        private activityLog: ActivityLogService,
     ) { }
 
     private async getCurrentUsdRate(): Promise<number> {
@@ -283,6 +285,17 @@ export class SalesService {
                 }
             }
 
+            // Log activity
+            this.activityLog.log({
+                action: 'SALE',
+                entityType: 'sale',
+                entityId: result?.id,
+                description: `بيع ${result?.invoiceNumber} — ${dto.items.length} عنصر — ${result?.total} د.ل`,
+                details: { invoiceNumber: result?.invoiceNumber, total: result?.total, items: dto.items.length, paymentMethod },
+                userId: cashier.id,
+                branchId: dto.branchId,
+            }).catch(() => {});
+
             return result;
         });
     }
@@ -386,6 +399,16 @@ export class SalesService {
                 voidedBy: user.id,
             });
 
+            this.activityLog.log({
+                action: 'VOID',
+                entityType: 'sale',
+                entityId: sale.id,
+                description: `إلغاء فاتورة ${sale.invoiceNumber} — ${sale.total} د.ل — ${reason || 'بدون سبب'}`,
+                details: { invoiceNumber: sale.invoiceNumber, total: sale.total, reason },
+                userId: user.id,
+                branchId: sale.branchId,
+            }).catch(() => {});
+
             return sale;
         });
     }
@@ -420,6 +443,15 @@ export class SalesService {
             changedBy: userId,
             note: note || undefined,
         }));
+
+        this.activityLog.log({
+            action: 'BANK_STATUS',
+            entityType: 'sale',
+            entityId: saleId,
+            description: `تحديث حالة التحويل البنكي: ${oldStatus} → ${newStatus}`,
+            details: { oldStatus, newStatus, note },
+            userId,
+        }).catch(() => {});
 
         return sale;
     }
@@ -462,6 +494,15 @@ export class SalesService {
             changedBy: userId,
             note: note || undefined,
         }));
+
+        this.activityLog.log({
+            action: 'DELIVERY_STATUS',
+            entityType: 'sale',
+            entityId: saleId,
+            description: `تحديث حالة التوصيل: ${oldStatus} → ${newStatus}`,
+            details: { oldStatus, newStatus, note },
+            userId,
+        }).catch(() => {});
 
         return sale;
     }

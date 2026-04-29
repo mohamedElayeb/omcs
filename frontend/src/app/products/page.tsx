@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { useAuthStore } from '../../lib/store';
-import { productsApi, categoriesApi, settingsApi, branchesApi } from '../../lib/api';
+import { productsApi, categoriesApi, settingsApi, branchesApi, inventoryApi } from '../../lib/api';
 import { useToast } from '../../components/Toast';
 import { useTranslation } from '../../lib/i18n';
 // Simple search — no complex component needed
@@ -64,6 +64,7 @@ export default function ProductsPage() {
     const { t } = useTranslation();
     const [products, setProducts] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
+    const [inventory, setInventory] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
@@ -138,21 +139,30 @@ export default function ProductsPage() {
     // Validation
     const [errors, setErrors] = useState<string[]>([]);
 
+    // Helper: get total stock for a variant across all branches from inventory data
+    const getVariantStock = (variantId: string) => {
+        return inventory
+            .filter((i: any) => i.variantId === variantId)
+            .reduce((sum: number, i: any) => sum + (Number(i.quantity) || 0), 0);
+    };
+
     const loadData = async () => {
         if (!token) return;
         const query = new URLSearchParams();
         if (search) query.set('search', search);
         if (categoryFilter) query.set('categoryId', categoryFilter);
         try {
-            const [p, c, s, b] = await Promise.all([
+            const [p, c, s, b, inv] = await Promise.all([
                 productsApi.findAll(token, query.toString()),
                 categoriesApi.findAll(token),
                 settingsApi.getAll(token),
                 branchesApi.findAll(token),
+                inventoryApi.findAll(token),
             ]);
             setProducts(p);
             setCategories(c);
             setBranches(b);
+            setInventory(inv);
             const purchaseRate = Number(s.parallelUsdRate) || 6.30;
             const sellRate = Number(s.sellingUsdRate) || purchaseRate;
             setUsdRate(purchaseRate);
@@ -212,9 +222,9 @@ export default function ProductsPage() {
             // Brand filter
             if (brandFilter && p.brand !== brandFilter) return false;
             // Stock filter
-            if (stockFilter !== 'all') {
-                const vs = p.variants || [];
-                const totalQty = vs.reduce((s: number, v: any) => s + (Number(v.quantity) || 0), 0);
+            const vs = p.variants || [];
+            const totalQty = vs.reduce((s: number, v: any) => s + getVariantStock(v.id), 0);
+            if (stockFilter !== 'all' && stockFilter !== 'outOfStock') {
                 const hasLow = vs.some((v: any) => {
                     const qty = Number(v.quantity) || 0;
                     const thresh = Number(v.lowStockThreshold) || 5;
@@ -222,8 +232,8 @@ export default function ProductsPage() {
                 });
                 if (stockFilter === 'inStock' && totalQty <= 0) return false;
                 if (stockFilter === 'lowStock' && !hasLow) return false;
-                if (stockFilter === 'outOfStock' && totalQty > 0) return false;
             }
+            if (stockFilter === 'outOfStock' && totalQty > 0) return false;
             return true;
         });
     }, [products, search, brandFilter, stockFilter]);
@@ -617,12 +627,8 @@ export default function ProductsPage() {
             const allMargins = vs.map((v: any) => Number(v.profitMargin || 0).toFixed(1));
             const uniqueMargins = [...new Set(allMargins)] as string[];
             const sizes: string[] = vs.map((v: any) => v.size).filter(Boolean);
-            const totalQty = vs.reduce((s: number, v: any) => s + (Number(v.quantity) || 0), 0);
-            const lowStock = vs.some((v: any) => {
-                const qty = Number(v.quantity) || 0;
-                const threshold = Number(v.lowStockThreshold) || 5;
-                return qty > 0 && qty <= threshold;
-            });
+            const totalQty = vs.reduce((s: number, v: any) => s + getVariantStock(v.id), 0);
+            const lowStock = totalQty > 0 && totalQty <= 1;
             const marginAvg = allMargins.length > 0 ? allMargins.reduce((s: number, m: string) => s + Number(m), 0) / allMargins.length : 0;
 
             let priceDisplay = '—';
@@ -657,7 +663,7 @@ export default function ProductsPage() {
                 raw: p,
             };
         });
-    }, [filteredProducts]);
+    }, [filteredProducts, inventory]);
 
     // Restore viewMode from localStorage
     useEffect(() => {
@@ -708,7 +714,7 @@ export default function ProductsPage() {
                         { key: 'all' as const, label: t('products.stockAll') },
                         { key: 'inStock' as const, label: t('products.inStockBadge') },
                         { key: 'lowStock' as const, label: t('products.lowStockBadge') },
-                        { key: 'outOfStock' as const, label: t('products.noStockBadge') },
+                        { key: 'outOfStock' as const, label: t('products.archiveBadge') },
                     ].map(chip => (
                         <button
                             key={chip.key}
@@ -856,7 +862,7 @@ export default function ProductsPage() {
                                     ✏️ {t('products.editAction')}
                                 </button>
                                 <button className="product-card__action-btn"
-                                    onClick={e => { e.stopPropagation(); window.location.href = '/inventory'; }}>
+                                    onClick={e => { e.stopPropagation(); window.location.href = `/inventory?search=${encodeURIComponent(pm.name)}`; }}>
                                     🏪 {t('products.inventoryAction')}
                                 </button>
                                 <button className="product-card__action-btn"
